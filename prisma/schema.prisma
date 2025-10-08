@@ -1,0 +1,134 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户表
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String   @unique
+  name      String?
+  avatar    String?
+  role      UserRole @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联
+  playlists Playlist[]
+}
+
+// 艺术家表
+model Artist {
+  id          Int      @id @default(autoincrement())
+  name        String
+  avatar      String?
+  description String?  @db.Text
+  country     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  songs  Song[]
+  albums Album[]
+}
+
+// 专辑表
+model Album {
+  id          Int      @id @default(autoincrement())
+  title       String
+  cover       String?
+  releaseDate DateTime?
+  description String?  @db.Text
+  artistId    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  songs  Song[]
+}
+
+// 分类表
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  color       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  songs Song[]
+}
+
+// 歌曲表
+model Song {
+  id          Int      @id @default(autoincrement())
+  title       String
+  duration    Int?
+  fileUrl     String?
+  cover       String?
+  lyrics      String?  @db.Text
+  artistId    Int
+  albumId     Int?
+  categoryId  Int?
+  trackNumber Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  artist       Artist         @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  album        Album?         @relation(fields: [albumId], references: [id], onDelete: SetNull)
+  category     Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  playlistSongs PlaylistSong[]
+}
+
+// 歌单表
+model Playlist {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?  @db.Text
+  cover       String?
+  isPublic    Boolean  @default(true)
+  userId      Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playlistSongs PlaylistSong[]
+}
+
+// 歌单歌曲关联表
+model PlaylistSong {
+  id         Int      @id @default(autoincrement())
+  playlistId Int
+  songId     Int
+  order      Int
+  addedAt    DateTime @default(now())
+
+  // 关联
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  song     Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  // 复合唯一索引
+  @@unique([playlistId, songId])
+}
+
+// 枚举
+enum UserRole {
+  ADMIN
+  MANAGER
+}
