@@ -7,9 +7,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: '123456'
-      MYSQL_DATABASE: 'mysql-test'
-      MYSQL_USER: 'root'
-      MYSQL_PASSWORD: '123456'
+      MYSQL_DATABASE: 'song-manage-db'
     ports:
       - '3306:3306'
     volumes:

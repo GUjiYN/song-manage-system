@@ -1,5 +1,16 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## API Documentation
+
+- 最新后端接口规格位于 `docs/openapi.yaml`，可直接导入 Apifox / Postman / Swagger UI。
+- 开发时推荐执行：
+  ```bash
+  npm install
+  npx prisma generate
+  npm run dev
+  ```
+- 在 Apifox 中选择 “导入 > OpenAPI 3.0+”，上传该文件并设置 Base URL 为 `http://localhost:3000` 即可调试。
+
 ## Getting Started
 
 First, run the development server:

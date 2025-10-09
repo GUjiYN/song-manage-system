@@ -16,14 +16,15 @@ datasource db {
 
 // 用户表
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String   @unique
-  name      String?
-  avatar    String?
-  role      UserRole @default(ADMIN)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  username     String   @unique
+  name         String?
+  avatar       String?
+  passwordHash String
+  role         UserRole @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // 关联
   playlists Playlist[]
@@ -70,7 +71,7 @@ model Category {
   updatedAt   DateTime @updatedAt
 
   // 关联
-  songs Song[]
+  songs Song[] @relation("SongCategories")
 }
 
 // 歌曲表
@@ -83,15 +84,14 @@ model Song {
   lyrics      String?  @db.Text
   artistId    Int
   albumId     Int?
-  categoryId  Int?
   trackNumber Int?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // 关联
-  artist       Artist         @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  album        Album?         @relation(fields: [albumId], references: [id], onDelete: SetNull)
-  category     Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  artist        Artist         @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  album         Album?         @relation(fields: [albumId], references: [id], onDelete: SetNull)
+  categories    Category[]     @relation("SongCategories")
   playlistSongs PlaylistSong[]
 }
 
@@ -125,10 +125,12 @@ model PlaylistSong {
 
   // 复合唯一索引
   @@unique([playlistId, songId])
+  @@unique([playlistId, order])
 }
 
 // 枚举
 enum UserRole {
   ADMIN
   MANAGER
+  USER
 }
