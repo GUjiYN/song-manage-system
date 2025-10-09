@@ -1,16 +1,5 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## API Documentation
-
-- 最新后端接口规格位于 `docs/openapi.yaml`，可直接导入 Apifox / Postman / Swagger UI。
-- 开发时推荐执行：
-  ```bash
-  npm install
-  npx prisma generate
-  npm run dev
-  ```
-- 在 Apifox 中选择 “导入 > OpenAPI 3.0+”，上传该文件并设置 Base URL 为 `http://localhost:3000` 即可调试。
-
 ## Getting Started
 
 First, run the development server:
@@ -45,3 +34,15 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## API Documentation
+
+- The latest backend interface specifications are located in docs/openapi.yaml and can be directly imported into Apifox / Postman / Swagger UI.
+- Recommended execution during development:
+  ```bash
+  npm install
+  npx prisma generate
+  npm run dev
+  ```
+- In Apifox, select "Import > OpenAPI 3.0+", upload the file and set the Base URL to `http://localhost:3000` to debug.
+
