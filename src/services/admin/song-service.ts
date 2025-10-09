@@ -4,12 +4,18 @@ import { ApiError } from '@/lib/http';
 import type { PaginationResult } from '@/lib/pagination';
 import type { SongCreatePayload, SongUpdatePayload } from '@/lib/validators/admin';
 
+/**
+ * 歌曲查询默认返回关联歌手、专辑与分类
+ */
 const songInclude = {
   artist: true,
   album: true,
   categories: true,
 } satisfies Prisma.SongInclude;
 
+/**
+ * 分页查询歌曲，支持多条件筛选
+ */
 export async function listSongs(params: {
   pagination: PaginationResult;
   search?: string | null;
@@ -61,6 +67,10 @@ export async function listSongs(params: {
   };
 }
 
+// 确认关联艺术家存在
+/**
+ * 确认关联艺术家存在
+ */
 async function ensureArtistExists(id: number) {
   const artist = await prisma.artist.findUnique({ where: { id }, select: { id: true } });
   if (!artist) {
@@ -68,6 +78,10 @@ async function ensureArtistExists(id: number) {
   }
 }
 
+// 按需确认关联专辑存在
+/**
+ * 按需确认关联专辑存在
+ */
 async function ensureAlbumExists(id?: number | null) {
   if (!id) {
     return;
@@ -78,6 +92,10 @@ async function ensureAlbumExists(id?: number | null) {
   }
 }
 
+// 校验传入的分类是否全部存在
+/**
+ * 校验传入的分类是否全部存在
+ */
 async function ensureCategoriesExist(categoryIds?: number[] | null) {
   if (!categoryIds || categoryIds.length === 0) {
     return;
@@ -91,6 +109,9 @@ async function ensureCategoriesExist(categoryIds?: number[] | null) {
   }
 }
 
+/**
+ * 创建歌曲前校验所有关联数据并建立关系
+ */
 export async function createSong(payload: SongCreatePayload) {
   await ensureArtistExists(payload.artistId);
   await ensureAlbumExists(payload.albumId ?? null);
@@ -116,6 +137,9 @@ export async function createSong(payload: SongCreatePayload) {
   });
 }
 
+/**
+ * 获取歌曲详情，附带歌单中出现的排序信息
+ */
 export async function getSongById(id: number) {
   const song = await prisma.song.findUnique({
     where: { id },
@@ -138,6 +162,9 @@ export async function getSongById(id: number) {
   return song;
 }
 
+/**
+ * 更新歌曲前校验变更内容与依赖数据
+ */
 export async function updateSong(id: number, payload: SongUpdatePayload) {
   if (Object.keys(payload).length === 0) {
     throw new ApiError(400, '请求体不能为空');
@@ -182,6 +209,9 @@ export async function updateSong(id: number, payload: SongUpdatePayload) {
   });
 }
 
+/**
+ * 直接根据主键删除歌曲
+ */
 export async function deleteSong(id: number) {
   await prisma.song.delete({ where: { id } });
 }

@@ -8,6 +8,9 @@ import type {
   PlaylistSongCreatePayload,
 } from '@/lib/validators/playlists';
 
+/**
+ * 歌单查询统一包含创建者与曲目信息
+ */
 const playlistInclude = {
   user: {
     select: { id: true, username: true, avatar: true },
@@ -26,6 +29,9 @@ const playlistInclude = {
   },
 } satisfies Prisma.PlaylistInclude;
 
+/**
+ * 查询公开歌单列表，支持搜索与分页
+ */
 export async function listPublicPlaylists(params: { pagination: PaginationResult; search?: string | null }) {
   const where: Prisma.PlaylistWhereInput = { isPublic: true };
 
@@ -66,6 +72,9 @@ export async function listPublicPlaylists(params: { pagination: PaginationResult
   };
 }
 
+/**
+ * 创建歌单并默认设定公开状态
+ */
 export async function createPlaylist(userId: number, payload: PlaylistCreatePayload) {
   return prisma.playlist.create({
     data: {
@@ -79,6 +88,9 @@ export async function createPlaylist(userId: number, payload: PlaylistCreatePayl
   });
 }
 
+/**
+ * 获取指定用户创建的歌单列表
+ */
 export async function listUserPlaylists(userId: number) {
   return prisma.playlist.findMany({
     where: { userId },
@@ -87,6 +99,9 @@ export async function listUserPlaylists(userId: number) {
   });
 }
 
+/**
+ * 获取单个歌单详情，未找到则抛错
+ */
 export async function getPlaylistDetail(id: number) {
   const playlist = await prisma.playlist.findUnique({
     where: { id },
@@ -100,6 +115,9 @@ export async function getPlaylistDetail(id: number) {
   return playlist;
 }
 
+/**
+ * 校验权限和参数后更新歌单信息
+ */
 export async function updatePlaylist(id: number, userId: number, payload: PlaylistUpdatePayload) {
   if (Object.keys(payload).length === 0) {
     throw new ApiError(400, '请求体不能为空');
@@ -125,6 +143,9 @@ export async function updatePlaylist(id: number, userId: number, payload: Playli
   });
 }
 
+/**
+ * 校验权限后删除歌单
+ */
 export async function deletePlaylist(id: number, userId: number) {
   const playlist = await prisma.playlist.findUnique({ where: { id }, select: { userId: true } });
   if (!playlist) {
@@ -137,6 +158,9 @@ export async function deletePlaylist(id: number, userId: number) {
   await prisma.playlist.delete({ where: { id } });
 }
 
+/**
+ * 在事务中校验并按顺序添加歌曲
+ */
 export async function addSongToPlaylist(playlistId: number, userId: number, payload: PlaylistSongCreatePayload) {
   const playlist = await prisma.playlist.findUnique({ where: { id: playlistId }, select: { userId: true } });
   if (!playlist) {
@@ -205,6 +229,9 @@ export async function addSongToPlaylist(playlistId: number, userId: number, payl
   });
 }
 
+/**
+ * 在事务中移除歌曲并调整剩余排序
+ */
 export async function removeSongFromPlaylist(playlistId: number, songId: number, userId: number) {
   const playlist = await prisma.playlist.findUnique({ where: { id: playlistId }, select: { userId: true } });
   if (!playlist) {

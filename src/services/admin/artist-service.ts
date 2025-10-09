@@ -4,6 +4,9 @@ import { ApiError } from '@/lib/http';
 import type { PaginationResult } from '@/lib/pagination';
 import type { ArtistCreatePayload, ArtistUpdatePayload } from '@/lib/validators/admin';
 
+/**
+ * 艺术家列表字段选择器，限定返回信息
+ */
 const artistSelect = {
   id: true,
   name: true,
@@ -16,6 +19,9 @@ const artistSelect = {
 
 type Artist = Prisma.ArtistGetPayload<{ select: typeof artistSelect }>;
 
+/**
+ * 分页查询艺术家，支持名称模糊搜索
+ */
 export async function listArtists(params: { pagination: PaginationResult; search?: string | null }) {
   const where = params.search
     ? {
@@ -45,6 +51,9 @@ export async function listArtists(params: { pagination: PaginationResult; search
   };
 }
 
+/**
+ * 创建前检查名称是否已存在
+ */
 export async function createArtist(payload: ArtistCreatePayload): Promise<Artist> {
   const existing = await prisma.artist.findFirst({
     where: { name: payload.name },
@@ -58,6 +67,9 @@ export async function createArtist(payload: ArtistCreatePayload): Promise<Artist
   return prisma.artist.create({ data: payload, select: artistSelect });
 }
 
+/**
+ * 获取包含专辑与歌曲的艺术家详情
+ */
 export async function getArtistById(id: number) {
   const artist = await prisma.artist.findUnique({
     where: { id },
@@ -74,6 +86,9 @@ export async function getArtistById(id: number) {
   return artist;
 }
 
+/**
+ * 更新前校验请求体并确保目标存在
+ */
 export async function updateArtist(id: number, payload: ArtistUpdatePayload) {
   if (Object.keys(payload).length === 0) {
     throw new ApiError(400, '请求体不能为空');
@@ -87,6 +102,9 @@ export async function updateArtist(id: number, payload: ArtistUpdatePayload) {
   return prisma.artist.update({ where: { id }, data: payload, select: artistSelect });
 }
 
+/**
+ * 删除前确认艺术家存在，避免静默失败
+ */
 export async function deleteArtist(id: number) {
   const existing = await prisma.artist.findUnique({ where: { id }, select: { id: true } });
   if (!existing) {

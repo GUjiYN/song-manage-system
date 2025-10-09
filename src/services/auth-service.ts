@@ -5,6 +5,9 @@ import { signJwt } from '@/lib/jwt';
 import { ApiError } from '@/lib/http';
 import type { RegisterPayload, LoginPayload } from '@/lib/validators/auth';
 
+/**
+ * 统一规范的用户字段选择器，避免暴露密码等敏感信息
+ */
 const authUserSelect = {
   id: true,
   email: true,
@@ -21,6 +24,9 @@ export type AuthResult = {
   token: string;
 };
 
+/**
+ * 注册用户：校验唯一性、加密密码并生成令牌
+ */
 export async function registerUser(payload: RegisterPayload): Promise<AuthResult> {
   const existingUser = await prisma.user.findFirst({
     where: {
@@ -50,6 +56,9 @@ export async function registerUser(payload: RegisterPayload): Promise<AuthResult
   return { user, token };
 }
 
+/**
+ * 登录认证：校验账号密码并签发访问令牌
+ */
 export async function authenticateUser(payload: LoginPayload): Promise<AuthResult> {
   const user = await prisma.user.findFirst({
     where: {

@@ -4,10 +4,16 @@ import { ApiError } from '@/lib/http';
 import type { PaginationResult } from '@/lib/pagination';
 import type { CategoryCreatePayload, CategoryUpdatePayload } from '@/lib/validators/admin';
 
+/**
+ * 分类查询时默认加载关联歌曲
+ */
 const categoryInclude = {
   songs: true,
 } satisfies Prisma.CategoryInclude;
 
+/**
+ * 分页查询分类，支持名称模糊搜索
+ */
 export async function listCategories(params: { pagination: PaginationResult; search?: string | null }) {
   const where = params.search
     ? {
@@ -37,6 +43,9 @@ export async function listCategories(params: { pagination: PaginationResult; sea
   };
 }
 
+/**
+ * 创建分类前校验名称唯一性
+ */
 export async function createCategory(payload: CategoryCreatePayload) {
   const existing = await prisma.category.findUnique({ where: { name: payload.name }, select: { id: true } });
   if (existing) {
@@ -46,6 +55,9 @@ export async function createCategory(payload: CategoryCreatePayload) {
   return prisma.category.create({ data: payload, include: categoryInclude });
 }
 
+/**
+ * 获取分类详情，包含关联歌曲
+ */
 export async function getCategoryById(id: number) {
   const category = await prisma.category.findUnique({ where: { id }, include: categoryInclude });
   if (!category) {
@@ -54,6 +66,9 @@ export async function getCategoryById(id: number) {
   return category;
 }
 
+/**
+ * 校验请求体后更新分类信息
+ */
 export async function updateCategory(id: number, payload: CategoryUpdatePayload) {
   if (Object.keys(payload).length === 0) {
     throw new ApiError(400, '请求体不能为空');
@@ -62,6 +77,9 @@ export async function updateCategory(id: number, payload: CategoryUpdatePayload)
   return prisma.category.update({ where: { id }, data: payload, include: categoryInclude });
 }
 
+/**
+ * 按主键删除分类
+ */
 export async function deleteCategory(id: number) {
   await prisma.category.delete({ where: { id } });
 }

@@ -4,6 +4,9 @@ import { ApiError } from '@/lib/http';
 import type { PaginationResult } from '@/lib/pagination';
 import type { AlbumCreatePayload, AlbumUpdatePayload } from '@/lib/validators/admin';
 
+/**
+ * 专辑查询默认返回关联艺术家与歌曲
+ */
 const albumInclude = {
   artist: true,
   songs: true,
@@ -11,6 +14,9 @@ const albumInclude = {
 
 type AlbumWithRelations = Prisma.AlbumGetPayload<{ include: typeof albumInclude }>;
 
+/**
+ * 将字符串日期解析为 Date 并做格式校验
+ */
 function parseDate(value?: string | null) {
   if (!value) {
     return undefined;
@@ -22,6 +28,9 @@ function parseDate(value?: string | null) {
   return date;
 }
 
+/**
+ * 分页查询专辑，支持名称搜索与艺术家筛选
+ */
 export async function listAlbums(params: {
   pagination: PaginationResult;
   search?: string | null;
@@ -58,6 +67,9 @@ export async function listAlbums(params: {
   };
 }
 
+/**
+ * 创建专辑前校验关联艺术家并解析发布日期
+ */
 export async function createAlbum(payload: AlbumCreatePayload): Promise<AlbumWithRelations> {
   const artist = await prisma.artist.findUnique({ where: { id: payload.artistId }, select: { id: true } });
   if (!artist) {
@@ -78,6 +90,9 @@ export async function createAlbum(payload: AlbumCreatePayload): Promise<AlbumWit
   });
 }
 
+/**
+ * 获取专辑详情，包含歌曲与艺术家信息
+ */
 export async function getAlbumById(id: number): Promise<AlbumWithRelations> {
   const album = await prisma.album.findUnique({
     where: { id },
@@ -98,6 +113,9 @@ export async function getAlbumById(id: number): Promise<AlbumWithRelations> {
   return album;
 }
 
+/**
+ * 校验请求体与关联数据后更新专辑
+ */
 export async function updateAlbum(id: number, payload: AlbumUpdatePayload): Promise<AlbumWithRelations> {
   if (Object.keys(payload).length === 0) {
     throw new ApiError(400, '请求体不能为空');
@@ -125,6 +143,9 @@ export async function updateAlbum(id: number, payload: AlbumUpdatePayload): Prom
   });
 }
 
+/**
+ * 直接按主键删除专辑记录
+ */
 export async function deleteAlbum(id: number) {
   await prisma.album.delete({ where: { id } });
 }
