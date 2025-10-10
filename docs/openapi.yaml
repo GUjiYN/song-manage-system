@@ -181,9 +181,10 @@ components:
           type: string
           description: 歌曲名称
         duration:
-          type: integer
+          type: string
+          pattern: '^\d{2}:\d{2}$'
           nullable: true
-          description: 歌曲时长（秒）
+          description: 歌曲时长（mm:ss）
         fileUrl:
           type: string
           format: uri
@@ -1004,8 +1005,9 @@ paths:
                   type: string
                   description: 歌曲名称
                 duration:
-                  type: integer
-                  description: 歌曲时长（秒）
+                  type: string
+                  pattern: '^\d{2}:\d{2}$'
+                  description: 歌曲时长（mm:ss）
                 fileUrl:
                   type: string
                   format: uri
@@ -1088,8 +1090,9 @@ paths:
                   type: string
                   description: 歌曲名称
                 duration:
-                  type: integer
-                  description: 歌曲时长（秒）
+                  type: string
+                  pattern: '^\d{2}:\d{2}$'
+                  description: 歌曲时长（mm:ss）
                 fileUrl:
                   type: string
                   format: uri

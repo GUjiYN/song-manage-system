@@ -33,7 +33,7 @@ CREATE TABLE `Album` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(191) NOT NULL,
     `cover` VARCHAR(191) NULL,
-    `releaseDate` DATETIME(3) NULL,
+    `releaseDate` DATE NULL,
     `description` TEXT NULL,
     `artistId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -59,7 +59,7 @@ CREATE TABLE `Category` (
 CREATE TABLE `Song` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(191) NOT NULL,
-    `duration` INTEGER NULL,
+    `duration` CHAR(5) NULL,
     `fileUrl` VARCHAR(191) NULL,
     `cover` VARCHAR(191) NULL,
     `lyrics` TEXT NULL,

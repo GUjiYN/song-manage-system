@@ -78,7 +78,7 @@ model Category {
 model Song {
   id          Int      @id @default(autoincrement())
   title       String
-  duration    Int?
+  duration    String?  @db.Char(5)
   fileUrl     String?
   cover       String?
   lyrics      String?  @db.Text

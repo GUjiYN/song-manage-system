@@ -17,6 +17,22 @@ const dateOnlySchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式需为 YYYY-MM-DD');
 
+const durationSchema = z
+  .string()
+  .regex(/^\d{2}:\d{2}$/, '时长格式需为 mm:ss')
+  .refine((value) => {
+    const [minutes, seconds] = value.split(':');
+    const minuteNumber = Number(minutes);
+    const secondNumber = Number(seconds);
+    return (
+      Number.isInteger(minuteNumber) &&
+      minuteNumber >= 0 &&
+      Number.isInteger(secondNumber) &&
+      secondNumber >= 0 &&
+      secondNumber < 60
+    );
+  }, '秒需在 00-59 范围内');
+
 export const albumCreateSchema = z.object({
   title: z.string().min(1).max(200),
   cover: z.string().url().optional(),
@@ -41,7 +57,7 @@ const categoryIdsSchema = z.array(z.number().int().positive()).optional();
 
 export const songCreateSchema = z.object({
   title: z.string().min(1).max(200),
-  duration: z.number().int().positive().optional(),
+  duration: durationSchema.optional(),
   fileUrl: z.string().url().optional(),
   cover: z.string().url().optional(),
   lyrics: z.string().optional(),
