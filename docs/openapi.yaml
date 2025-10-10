@@ -19,210 +19,277 @@ components:
       properties:
         page:
           type: integer
+          description: 当前页码
         pageSize:
           type: integer
+          description: 每页返回的数据条数
         total:
           type: integer
+          description: 数据总条数
         totalPages:
           type: integer
+          description: 总页数
     ApiError:
       type: object
       properties:
         success:
           type: boolean
           example: false
+          description: 是否请求成功
         error:
           type: object
+          description: 错误信息对象
           properties:
             message:
               type: string
+              description: 错误描述
             code:
               type: string
               nullable: true
+              description: 错误码，可为空
     AuthUser:
       type: object
       properties:
         id:
           type: integer
+          description: 用户唯一标识
         email:
           type: string
           format: email
+          description: 用户邮箱
         username:
           type: string
+          description: 用户名
         name:
           type: string
           nullable: true
+          description: 昵称
         avatar:
           type: string
           format: uri
           nullable: true
+          description: 头像地址
         role:
           type: string
           enum: [ADMIN, MANAGER, USER]
+          description: 角色类型
     Artist:
       type: object
       properties:
         id:
           type: integer
+          description: 艺术家 ID
         name:
           type: string
+          description: 艺术家名称
         avatar:
           type: string
           format: uri
           nullable: true
+          description: 艺术家头像 URL
         description:
           type: string
           nullable: true
+          description: 艺术家简介
         country:
           type: string
           nullable: true
+          description: 国家或地区
         createdAt:
           type: string
           format: date-time
+          description: 创建时间
         updatedAt:
           type: string
           format: date-time
+          description: 更新时间
     Album:
       type: object
       properties:
         id:
           type: integer
+          description: 专辑 ID
         title:
           type: string
+          description: 专辑名称
         cover:
           type: string
           format: uri
           nullable: true
+          description: 专辑封面 URL
         releaseDate:
           type: string
           format: date-time
           nullable: true
+          description: 发行时间
         description:
           type: string
           nullable: true
+          description: 专辑简介
         artistId:
           type: integer
+          description: 所属艺术家 ID
         createdAt:
           type: string
           format: date-time
+          description: 创建时间
         updatedAt:
           type: string
           format: date-time
+          description: 更新时间
         artist:
           $ref: '#/components/schemas/Artist'
+          description: 所属艺术家信息
         songs:
           type: array
           items:
             $ref: '#/components/schemas/Song'
           nullable: true
+          description: 收录的歌曲列表
     Category:
       type: object
       properties:
         id:
           type: integer
+          description: 分类 ID
         name:
           type: string
+          description: 分类名称
         description:
           type: string
           nullable: true
+          description: 分类描述
         color:
           type: string
           nullable: true
+          description: 分类标识颜色
         createdAt:
           type: string
           format: date-time
+          description: 创建时间
         updatedAt:
           type: string
           format: date-time
+          description: 更新时间
     Song:
       type: object
       properties:
         id:
           type: integer
+          description: 歌曲 ID
         title:
           type: string
+          description: 歌曲名称
         duration:
           type: integer
           nullable: true
+          description: 歌曲时长（秒）
         fileUrl:
           type: string
           format: uri
           nullable: true
+          description: 音频文件地址
         cover:
           type: string
           format: uri
           nullable: true
+          description: 歌曲封面 URL
         lyrics:
           type: string
           nullable: true
+          description: 歌词内容
         artistId:
           type: integer
+          description: 歌手 ID
         albumId:
           type: integer
           nullable: true
+          description: 专辑 ID
         trackNumber:
           type: integer
           nullable: true
+          description: 专辑内曲序
         createdAt:
           type: string
           format: date-time
+          description: 创建时间
         updatedAt:
           type: string
           format: date-time
+          description: 更新时间
         artist:
           $ref: '#/components/schemas/Artist'
+          description: 所属艺术家详情
         album:
           $ref: '#/components/schemas/Album'
+          description: 所属专辑详情
         categories:
           type: array
           items:
             $ref: '#/components/schemas/Category'
+          description: 分类列表
     PlaylistSong:
       type: object
       properties:
         id:
           type: integer
+          description: 歌单歌曲关联 ID
         playlistId:
           type: integer
+          description: 歌单 ID
         songId:
           type: integer
+          description: 歌曲 ID
         order:
           type: integer
+          description: 在歌单中的排序序号
         addedAt:
           type: string
           format: date-time
+          description: 加入歌单时间
         song:
           $ref: '#/components/schemas/Song'
+          description: 关联歌曲详情
     Playlist:
       type: object
       properties:
         id:
           type: integer
+          description: 歌单 ID
         name:
           type: string
+          description: 歌单名称
         description:
           type: string
           nullable: true
+          description: 歌单介绍
         cover:
           type: string
           format: uri
           nullable: true
+          description: 歌单封面 URL
         isPublic:
           type: boolean
+          description: 是否公开
         userId:
           type: integer
+          description: 创建者用户 ID
         createdAt:
           type: string
           format: date-time
+          description: 创建时间
         updatedAt:
           type: string
           format: date-time
+          description: 更新时间
         user:
           $ref: '#/components/schemas/AuthUser'
+          description: 创建者信息
         playlistSongs:
           type: array
           items:
             $ref: '#/components/schemas/PlaylistSong'
+          description: 歌单歌曲列表
 paths:
   /api/auth/register:
     post:
@@ -239,15 +306,20 @@ paths:
                 email:
                   type: string
                   format: email
+                  description: 注册邮箱
                 username:
                   type: string
+                  description: 用户名
                 password:
                   type: string
+                  description: 登录密码
                 name:
                   type: string
+                  description: 昵称
                 avatar:
                   type: string
                   format: uri
+                  description: 头像链接
       responses:
         '201':
           description: 注册成功
@@ -259,8 +331,10 @@ paths:
                   success:
                     type: boolean
                     example: true
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/AuthUser'
+                    description: 注册成功的用户信息
         '409':
           description: 邮箱或用户名重复
           content:
@@ -284,6 +358,7 @@ paths:
                   description: 邮箱或用户名
                 password:
                   type: string
+                  description: 登录密码
       responses:
         '200':
           description: 登录成功
@@ -300,8 +375,10 @@ paths:
                   success:
                     type: boolean
                     example: true
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/AuthUser'
+                    description: 登录用户信息
         '401':
           description: 账号或密码错误
           content:
@@ -323,15 +400,17 @@ paths:
                   success:
                     type: boolean
                     example: true
+                    description: 请求是否成功
                   data:
                     type: object
                     properties:
                       message:
                         type: string
+                        description: 提示消息
   /api/admin/artists:
     get:
       summary: 艺术家列表
-      tags: [Admin]
+      tags: [Admin/Artists]
       security:
         - cookieAuth: []
       parameters:
@@ -339,14 +418,17 @@ paths:
           name: page
           schema:
             type: integer
+          description: 页码，从 1 开始
         - in: query
           name: pageSize
           schema:
             type: integer
+          description: 每页条数
         - in: query
           name: search
           schema:
             type: string
+          description: 按名称模糊搜索
       responses:
         '200':
           description: 列表
@@ -358,7 +440,9 @@ paths:
                   success:
                     type: boolean
                     example: true
+                    description: 请求是否成功
                   data:
+                    description: 分页列表数据
                     allOf:
                       - $ref: '#/components/schemas/Pagination'
                       - type: object
@@ -367,9 +451,10 @@ paths:
                             type: array
                             items:
                               $ref: '#/components/schemas/Artist'
+                            description: 艺术家列表
     post:
       summary: 创建艺术家
-      tags: [Admin]
+      tags: [Admin/Artists]
       security:
         - cookieAuth: []
       requestBody:
@@ -382,13 +467,17 @@ paths:
               properties:
                 name:
                   type: string
+                  description: 艺术家名称
                 avatar:
                   type: string
                   format: uri
+                  description: 艺术家头像 URL
                 description:
                   type: string
+                  description: 艺术家简介
                 country:
                   type: string
+                  description: 国家或地区
       responses:
         '201':
           description: 创建成功
@@ -399,8 +488,10 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/Artist'
+                    description: 新建的艺术家信息
   /api/admin/artists/{id}:
     parameters:
       - in: path
@@ -408,9 +499,10 @@ paths:
         required: true
         schema:
           type: integer
+        description: 艺术家 ID
     get:
       summary: 艺术家详情
-      tags: [Admin]
+      tags: [Admin/Artists]
       security:
         - cookieAuth: []
       responses:
@@ -423,11 +515,13 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/Artist'
+                    description: 艺术家详情
     put:
       summary: 更新艺术家
-      tags: [Admin]
+      tags: [Admin/Artists]
       security:
         - cookieAuth: []
       requestBody:
@@ -439,13 +533,17 @@ paths:
               properties:
                 name:
                   type: string
+                  description: 艺术家名称
                 avatar:
                   type: string
                   format: uri
+                  description: 艺术家头像 URL
                 description:
                   type: string
+                  description: 艺术家简介
                 country:
                   type: string
+                  description: 国家或地区
       responses:
         '200':
           description: 更新成功
@@ -456,11 +554,13 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/Artist'
+                    description: 更新后的艺术家信息
     delete:
       summary: 删除艺术家
-      tags: [Admin]
+      tags: [Admin/Artists]
       security:
         - cookieAuth: []
       responses:
@@ -474,15 +574,17 @@ paths:
                   success:
                     type: boolean
                     example: true
+                    description: 请求是否成功
                   data:
                     type: object
                     properties:
                       message:
                         type: string
+                        description: 操作提示
   /api/admin/albums:
     get:
       summary: 专辑列表
-      tags: [Admin]
+      tags: [Admin/Albums]
       security:
         - cookieAuth: []
       parameters:
@@ -490,18 +592,22 @@ paths:
           name: page
           schema:
             type: integer
+          description: 页码，从 1 开始
         - in: query
           name: pageSize
           schema:
             type: integer
+          description: 每页条数
         - in: query
           name: search
           schema:
             type: string
+          description: 按专辑标题模糊搜索
         - in: query
           name: artistId
           schema:
             type: integer
+          description: 按艺术家 ID 过滤
       responses:
         '200':
           description: 列表
@@ -512,7 +618,9 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
+                    description: 分页列表数据
                     allOf:
                       - $ref: '#/components/schemas/Pagination'
                       - type: object
@@ -521,9 +629,10 @@ paths:
                             type: array
                             items:
                               $ref: '#/components/schemas/Album'
+                            description: 专辑列表
     post:
       summary: 创建专辑
-      tags: [Admin]
+      tags: [Admin/Albums]
       security:
         - cookieAuth: []
       requestBody:
@@ -536,16 +645,21 @@ paths:
               properties:
                 title:
                   type: string
+                  description: 专辑名称
                 cover:
                   type: string
                   format: uri
+                  description: 专辑封面 URL
                 releaseDate:
                   type: string
                   format: date-time
+                  description: 发行时间
                 description:
                   type: string
+                  description: 专辑简介
                 artistId:
                   type: integer
+                  description: 艺术家 ID
       responses:
         '201':
           description: 创建成功
@@ -556,8 +670,10 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/Album'
+                    description: 新建的专辑信息
   /api/admin/albums/{id}:
     parameters:
       - in: path
@@ -565,9 +681,10 @@ paths:
         required: true
         schema:
           type: integer
+        description: 专辑 ID
     get:
       summary: 专辑详情
-      tags: [Admin]
+      tags: [Admin/Albums]
       security:
         - cookieAuth: []
       responses:
@@ -580,11 +697,13 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/Album'
+                    description: 专辑详情
     put:
       summary: 更新专辑
-      tags: [Admin]
+      tags: [Admin/Albums]
       security:
         - cookieAuth: []
       requestBody:
@@ -596,16 +715,21 @@ paths:
               properties:
                 title:
                   type: string
+                  description: 专辑名称
                 cover:
                   type: string
                   format: uri
+                  description: 专辑封面 URL
                 releaseDate:
                   type: string
                   format: date-time
+                  description: 发行时间
                 description:
                   type: string
+                  description: 专辑简介
                 artistId:
                   type: integer
+                  description: 艺术家 ID
       responses:
         '200':
           description: 更新成功
@@ -616,11 +740,13 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/Album'
+                    description: 更新后的专辑信息
     delete:
       summary: 删除专辑
-      tags: [Admin]
+      tags: [Admin/Albums]
       security:
         - cookieAuth: []
       responses:
@@ -633,15 +759,17 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     type: object
                     properties:
                       message:
                         type: string
+                        description: 操作提示
   /api/admin/categories:
     get:
       summary: 分类列表
-      tags: [Admin]
+      tags: [Admin/Categories]
       security:
         - cookieAuth: []
       parameters:
@@ -649,14 +777,17 @@ paths:
           name: page
           schema:
             type: integer
+          description: 页码，从 1 开始
         - in: query
           name: pageSize
           schema:
             type: integer
+          description: 每页条数
         - in: query
           name: search
           schema:
             type: string
+          description: 按分类名称模糊搜索
       responses:
         '200':
           description: 列表
@@ -667,7 +798,9 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
+                    description: 分页列表数据
                     allOf:
                       - $ref: '#/components/schemas/Pagination'
                       - type: object
@@ -676,9 +809,10 @@ paths:
                             type: array
                             items:
                               $ref: '#/components/schemas/Category'
+                            description: 分类列表
     post:
       summary: 创建分类
-      tags: [Admin]
+      tags: [Admin/Categories]
       security:
         - cookieAuth: []
       requestBody:
@@ -691,10 +825,13 @@ paths:
               properties:
                 name:
                   type: string
+                  description: 分类名称
                 description:
                   type: string
+                  description: 分类描述
                 color:
                   type: string
+                  description: 分类标识颜色
       responses:
         '201':
           description: 创建成功
@@ -705,8 +842,10 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/Category'
+                    description: 新建的分类信息
   /api/admin/categories/{id}:
     parameters:
       - in: path
@@ -714,9 +853,10 @@ paths:
         required: true
         schema:
           type: integer
+        description: 分类 ID
     get:
       summary: 分类详情
-      tags: [Admin]
+      tags: [Admin/Categories]
       security:
         - cookieAuth: []
       responses:
@@ -733,7 +873,7 @@ paths:
                     $ref: '#/components/schemas/Category'
     put:
       summary: 更新分类
-      tags: [Admin]
+      tags: [Admin/Categories]
       security:
         - cookieAuth: []
       requestBody:
@@ -745,10 +885,13 @@ paths:
               properties:
                 name:
                   type: string
+                  description: 分类名称
                 description:
                   type: string
+                  description: 分类描述
                 color:
                   type: string
+                  description: 分类标识颜色
       responses:
         '200':
           description: 更新成功
@@ -759,11 +902,13 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/Category'
+                    description: 更新后的分类信息
     delete:
       summary: 删除分类
-      tags: [Admin]
+      tags: [Admin/Categories]
       security:
         - cookieAuth: []
       responses:
@@ -776,15 +921,17 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     type: object
                     properties:
                       message:
                         type: string
+                        description: 操作提示
   /api/admin/songs:
     get:
       summary: 歌曲列表
-      tags: [Admin]
+      tags: [Admin/Songs]
       security:
         - cookieAuth: []
       parameters:
@@ -792,26 +939,32 @@ paths:
           name: page
           schema:
             type: integer
+          description: 页码，从 1 开始
         - in: query
           name: pageSize
           schema:
             type: integer
+          description: 每页条数
         - in: query
           name: search
           schema:
             type: string
+          description: 按歌曲名称模糊搜索
         - in: query
           name: artistId
           schema:
             type: integer
+          description: 按艺术家 ID 过滤
         - in: query
           name: albumId
           schema:
             type: integer
+          description: 按专辑 ID 过滤
         - in: query
           name: categoryId
           schema:
             type: integer
+          description: 按分类 ID 过滤
       responses:
         '200':
           description: 列表
@@ -822,7 +975,9 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
+                    description: 分页列表数据
                     allOf:
                       - $ref: '#/components/schemas/Pagination'
                       - type: object
@@ -831,9 +986,10 @@ paths:
                             type: array
                             items:
                               $ref: '#/components/schemas/Song'
+                            description: 歌曲列表
     post:
       summary: 创建歌曲
-      tags: [Admin]
+      tags: [Admin/Songs]
       security:
         - cookieAuth: []
       requestBody:
@@ -846,26 +1002,35 @@ paths:
               properties:
                 title:
                   type: string
+                  description: 歌曲名称
                 duration:
                   type: integer
+                  description: 歌曲时长（秒）
                 fileUrl:
                   type: string
                   format: uri
+                  description: 音频文件地址
                 cover:
                   type: string
                   format: uri
+                  description: 歌曲封面 URL
                 lyrics:
                   type: string
+                  description: 歌词内容
                 artistId:
                   type: integer
+                  description: 歌手 ID
                 albumId:
                   type: integer
+                  description: 专辑 ID
                 categoryIds:
                   type: array
                   items:
                     type: integer
+                  description: 分类 ID 列表
                 trackNumber:
                   type: integer
+                  description: 专辑内曲序
       responses:
         '201':
           description: 创建成功
@@ -876,8 +1041,10 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/Song'
+                    description: 新建的歌曲信息
   /api/admin/songs/{id}:
     parameters:
       - in: path
@@ -885,9 +1052,10 @@ paths:
         required: true
         schema:
           type: integer
+        description: 歌曲 ID
     get:
       summary: 歌曲详情
-      tags: [Admin]
+      tags: [Admin/Songs]
       security:
         - cookieAuth: []
       responses:
@@ -900,11 +1068,13 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/Song'
+                    description: 歌曲详情
     put:
       summary: 更新歌曲
-      tags: [Admin]
+      tags: [Admin/Songs]
       security:
         - cookieAuth: []
       requestBody:
@@ -916,27 +1086,36 @@ paths:
               properties:
                 title:
                   type: string
+                  description: 歌曲名称
                 duration:
                   type: integer
+                  description: 歌曲时长（秒）
                 fileUrl:
                   type: string
                   format: uri
+                  description: 音频文件地址
                 cover:
                   type: string
                   format: uri
+                  description: 歌曲封面 URL
                 lyrics:
                   type: string
+                  description: 歌词内容
                 artistId:
                   type: integer
+                  description: 歌手 ID
                 albumId:
                   type: integer
                   nullable: true
+                  description: 专辑 ID
                 categoryIds:
                   type: array
                   items:
                     type: integer
+                  description: 分类 ID 列表
                 trackNumber:
                   type: integer
+                  description: 专辑内曲序
       responses:
         '200':
           description: 更新成功
@@ -947,11 +1126,13 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/Song'
+                    description: 更新后的歌曲信息
     delete:
       summary: 删除歌曲
-      tags: [Admin]
+      tags: [Admin/Songs]
       security:
         - cookieAuth: []
       responses:
@@ -964,11 +1145,13 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     type: object
                     properties:
                       message:
                         type: string
+                        description: 操作提示
   /api/users/me:
     get:
       summary: 获取个人信息
@@ -985,8 +1168,10 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/AuthUser'
+                    description: 当前用户信息
     put:
       summary: 更新个人资料
       tags: [User]
@@ -1001,9 +1186,11 @@ paths:
               properties:
                 name:
                   type: string
+                  description: 昵称
                 avatar:
                   type: string
                   format: uri
+                  description: 头像 URL
       responses:
         '200':
           description: 更新完成
@@ -1014,8 +1201,10 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/AuthUser'
+                    description: 更新后的用户信息
   /api/playlists:
     get:
       summary: 公开歌单列表
@@ -1025,14 +1214,17 @@ paths:
           name: page
           schema:
             type: integer
+          description: 页码，从 1 开始
         - in: query
           name: pageSize
           schema:
             type: integer
+          description: 每页条数
         - in: query
           name: search
           schema:
             type: string
+          description: 按歌单名称模糊搜索
       responses:
         '200':
           description: 列表
@@ -1043,7 +1235,9 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
+                    description: 分页列表数据
                     allOf:
                       - $ref: '#/components/schemas/Pagination'
                       - type: object
@@ -1052,6 +1246,7 @@ paths:
                             type: array
                             items:
                               $ref: '#/components/schemas/Playlist'
+                            description: 歌单列表
     post:
       summary: 创建歌单
       tags: [Playlist]
@@ -1067,13 +1262,17 @@ paths:
               properties:
                 name:
                   type: string
+                  description: 歌单名称
                 description:
                   type: string
+                  description: 歌单介绍
                 cover:
                   type: string
                   format: uri
+                  description: 歌单封面 URL
                 isPublic:
                   type: boolean
+                  description: 是否公开
       responses:
         '201':
           description: 创建成功
@@ -1084,8 +1283,10 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/Playlist'
+                    description: 新建的歌单信息
   /api/playlists/my:
     get:
       summary: 我的歌单
@@ -1102,10 +1303,12 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     type: array
                     items:
                       $ref: '#/components/schemas/Playlist'
+                    description: 自己创建的歌单列表
   /api/playlists/{id}:
     parameters:
       - in: path
@@ -1113,6 +1316,7 @@ paths:
         required: true
         schema:
           type: integer
+        description: 歌单 ID
     get:
       summary: 歌单详情
       tags: [Playlist]
@@ -1126,13 +1330,16 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
+                    description: 歌单详情数据
                     allOf:
                       - $ref: '#/components/schemas/Playlist'
                       - type: object
                         properties:
                           isOwner:
                             type: boolean
+                            description: 当前用户是否为创建者
     put:
       summary: 更新歌单
       tags: [Playlist]
@@ -1147,13 +1354,17 @@ paths:
               properties:
                 name:
                   type: string
+                  description: 歌单名称
                 description:
                   type: string
+                  description: 歌单介绍
                 cover:
                   type: string
                   format: uri
+                  description: 歌单封面 URL
                 isPublic:
                   type: boolean
+                  description: 是否公开
       responses:
         '200':
           description: 更新成功
@@ -1164,8 +1375,10 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/Playlist'
+                    description: 更新后的歌单信息
     delete:
       summary: 删除歌单
       tags: [Playlist]
@@ -1181,11 +1394,13 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     type: object
                     properties:
                       message:
                         type: string
+                        description: 操作提示
   /api/playlists/{id}/songs:
     parameters:
       - in: path
@@ -1193,6 +1408,7 @@ paths:
         required: true
         schema:
           type: integer
+        description: 歌单 ID
     post:
       summary: 歌单添加歌曲
       tags: [Playlist]
@@ -1208,8 +1424,10 @@ paths:
               properties:
                 songId:
                   type: integer
+                  description: 要添加的歌曲 ID
                 order:
                   type: integer
+                  description: 指定排序序号
       responses:
         '201':
           description: 添加成功
@@ -1220,8 +1438,10 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     $ref: '#/components/schemas/PlaylistSong'
+                    description: 新增的歌单歌曲关联
   /api/playlists/{id}/songs/{songId}:
     parameters:
       - in: path
@@ -1229,11 +1449,13 @@ paths:
         required: true
         schema:
           type: integer
+        description: 歌单 ID
       - in: path
         name: songId
         required: true
         schema:
           type: integer
+        description: 歌曲 ID
     delete:
       summary: 歌单移除歌曲
       tags: [Playlist]
@@ -1249,8 +1471,10 @@ paths:
                 properties:
                   success:
                     type: boolean
+                    description: 请求是否成功
                   data:
                     type: object
                     properties:
                       message:
                         type: string
+                        description: 操作提示
