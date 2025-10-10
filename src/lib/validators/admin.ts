@@ -13,10 +13,14 @@ export const artistCreateSchema = z.object({
 
 export const artistUpdateSchema = artistCreateSchema.partial();
 
+const dateOnlySchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式需为 YYYY-MM-DD');
+
 export const albumCreateSchema = z.object({
   title: z.string().min(1).max(200),
   cover: z.string().url().optional(),
-  releaseDate: z.string().datetime().optional(),
+  releaseDate: dateOnlySchema.optional(),
   description: z.string().max(5000).optional(),
   artistId: z.number().int().positive(),
 });

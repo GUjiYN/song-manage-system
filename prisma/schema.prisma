@@ -50,7 +50,7 @@ model Album {
   id          Int      @id @default(autoincrement())
   title       String
   cover       String?
-  releaseDate DateTime?
+  releaseDate DateTime? @db.Date
   description String?  @db.Text
   artistId    Int
   createdAt   DateTime @default(now())

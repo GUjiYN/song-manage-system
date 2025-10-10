@@ -119,9 +119,9 @@ components:
           description: 专辑封面 URL
         releaseDate:
           type: string
-          format: date-time
+          format: date
           nullable: true
-          description: 发行时间
+          description: 发行时间（YYYY-MM-DD）
         description:
           type: string
           nullable: true
@@ -652,8 +652,8 @@ paths:
                   description: 专辑封面 URL
                 releaseDate:
                   type: string
-                  format: date-time
-                  description: 发行时间
+                  format: date
+                  description: 发行时间（YYYY-MM-DD）
                 description:
                   type: string
                   description: 专辑简介
@@ -722,8 +722,8 @@ paths:
                   description: 专辑封面 URL
                 releaseDate:
                   type: string
-                  format: date-time
-                  description: 发行时间
+                  format: date
+                  description: 发行时间（YYYY-MM-DD）
                 description:
                   type: string
                   description: 专辑简介

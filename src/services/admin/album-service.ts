@@ -14,17 +14,36 @@ const albumInclude = {
 
 type AlbumWithRelations = Prisma.AlbumGetPayload<{ include: typeof albumInclude }>;
 
+const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
 /**
- * 将字符串日期解析为 Date 并做格式校验
+ * 将 YYYY-MM-DD 字符串解析为日期对象（UTC 零点）并校验有效性
  */
 function parseDate(value?: string | null) {
   if (!value) {
     return undefined;
   }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    throw new ApiError(400, '无效的日期格式');
+
+  if (!DATE_ONLY_REGEX.test(value)) {
+    throw new ApiError(400, '日期格式需为 YYYY-MM-DD');
   }
+
+  const [yearStr, monthStr, dayStr] = value.split('-');
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() + 1 !== month ||
+    date.getUTCDate() !== day
+  ) {
+    throw new ApiError(400, '无效的日期值');
+  }
+
   return date;
 }
 
