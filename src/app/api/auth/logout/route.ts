@@ -1,8 +1,13 @@
+import { NextResponse } from 'next/server';
 import { clearAuthCookie } from '@/lib/auth';
-import { successResponse } from '@/lib/http';
+import { successResponse, handleRouteError } from '@/lib/http';
 
 export async function POST() {
-  const response = successResponse({ message: '已退出登录' });
-  clearAuthCookie(response);
-  return response;
+  try {
+    const response = successResponse(null);
+    clearAuthCookie(response);
+    return response;
+  } catch (error) {
+    return handleRouteError(error);
+  }
 }
