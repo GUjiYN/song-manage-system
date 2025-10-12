@@ -92,6 +92,7 @@ export default function LoginPage() {
                                             identifier: e.target.value,
                                         })
                                     }
+                                    autoComplete="off"
                                     disabled={isLoading}
                                     required
                                 />
@@ -117,6 +118,7 @@ export default function LoginPage() {
                                             password: e.target.value,
                                         })
                                     }
+                                    autoComplete="off"
                                     disabled={isLoading}
                                     required
                                 />

@@ -8,7 +8,6 @@ import {
     CardAction,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
@@ -111,6 +110,7 @@ export default function RegisterPage() {
                                             email: e.target.value,
                                         })
                                     }
+                                    autoComplete="off"
                                     disabled={isLoading}
                                     required
                                 />
@@ -128,6 +128,7 @@ export default function RegisterPage() {
                                             username: e.target.value,
                                         })
                                     }
+                                    autoComplete="off"
                                     disabled={isLoading}
                                     required
                                 />
@@ -145,6 +146,7 @@ export default function RegisterPage() {
                                             name: e.target.value,
                                         })
                                     }
+                                    autoComplete="off"
                                     disabled={isLoading}
                                 />
                             </div>
@@ -161,6 +163,7 @@ export default function RegisterPage() {
                                             password: e.target.value,
                                         })
                                     }
+                                    autoComplete="new-password"
                                     disabled={isLoading}
                                     required
                                 />
@@ -170,11 +173,12 @@ export default function RegisterPage() {
                                 <Input
                                     id="confirmPassword"
                                     type="password"
-                                    placeholder="再���输入密码"
+                                    placeholder="再次输入密码"
                                     value={confirmPassword}
                                     onChange={(e) =>
                                         setConfirmPassword(e.target.value)
                                     }
+                                    autoComplete="new-password"
                                     disabled={isLoading}
                                     required
                                 />
@@ -189,15 +193,6 @@ export default function RegisterPage() {
                         </Button>
                     </form>
                 </CardContent>
-                <CardFooter className="flex-col gap-2">
-                    <Button
-                        variant="outline"
-                        className="w-full"
-                        disabled={isLoading}
-                    >
-                        使用 Google 注册
-                    </Button>
-                </CardFooter>
             </Card>
         </div>
     );
