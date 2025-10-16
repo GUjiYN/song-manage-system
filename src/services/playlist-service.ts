@@ -63,12 +63,26 @@ export async function listPublicPlaylists(params: { pagination: PaginationResult
     prisma.playlist.count({ where }),
   ]);
 
+  // 字段映射：将数据库的 cover 字段映射为前端的 coverUrl
+  const mappedItems = items.map(item => ({
+    ...item,
+    coverUrl: item.cover,
+    creator: item.user,
+    creatorId: item.userId,
+    _count: {
+      songs: item.playlistSongs.length,
+      followers: 0, // TODO: 需要添加收藏功能时计算
+    }
+  }));
+
   return {
-    items,
-    page: params.pagination.page,
-    pageSize: params.pagination.pageSize,
-    total,
-    totalPages: Math.ceil(total / params.pagination.pageSize),
+    data: mappedItems,
+    pagination: {
+      page: params.pagination.page,
+      limit: params.pagination.pageSize,
+      total,
+      totalPages: Math.ceil(total / params.pagination.pageSize),
+    },
   };
 }
 
@@ -76,7 +90,7 @@ export async function listPublicPlaylists(params: { pagination: PaginationResult
  * 创建歌单并默认设定公开状态
  */
 export async function createPlaylist(userId: number, payload: PlaylistCreatePayload) {
-  return prisma.playlist.create({
+  const playlist = await prisma.playlist.create({
     data: {
       name: payload.name,
       description: payload.description,
@@ -86,6 +100,18 @@ export async function createPlaylist(userId: number, payload: PlaylistCreatePayl
     },
     include: playlistInclude,
   });
+
+  // 字段映射：将数据库的 cover 字段映射为前端的 coverUrl
+  return {
+    ...playlist,
+    coverUrl: playlist.cover,
+    creator: playlist.user,
+    creatorId: playlist.userId,
+    _count: {
+      songs: playlist.playlistSongs.length,
+      followers: 0, // TODO: 需要添加收藏功能时计算
+    }
+  };
 }
 
 /**
