@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, useEffect, useCallback } from "react";
+import { createContext, useState, useEffect, useCallback, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import * as authService from "@/services/client/auth";
@@ -10,7 +10,7 @@ interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (data: LoginFormData) => Promise<void>;
+    login: (data: LoginFormData, options?: { redirectTo?: string }) => Promise<void>;
     register: (data: RegisterFormData) => Promise<void>;
     logout: () => Promise<void>;
     refreshUser: () => Promise<void>;
@@ -47,12 +47,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // 登录
     const login = useCallback(
-        async (data: LoginFormData) => {
+        async (data: LoginFormData, options?: { redirectTo?: string }) => {
             try {
                 const userData = await authService.login(data);
                 setUser(userData);
                 toast.success(`欢迎回来，${userData.name || userData.username}！`);
-                router.push("/");
+                const target = options?.redirectTo || "/";
+                router.push(target);
             } catch (error) {
                 if (error instanceof Error) {
                     toast.error(error.message);
@@ -69,10 +70,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const register = useCallback(
         async (data: RegisterFormData) => {
             try {
-                const userData = await authService.register(data);
-                setUser(userData);
-                toast.success(`注册成功，欢迎 ${userData.name || userData.username}！`);
-                router.push("/");
+                await authService.register(data);
+                setUser(null);
+                toast.success("注册成功，请登录");
+                router.push("/auth/login");
             } catch (error) {
                 if (error instanceof Error) {
                     toast.error(error.message);
@@ -91,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await authService.logout();
             setUser(null);
             toast.success("已退出登录");
-            router.push("/main");
+            router.push("/auth/login");
         } catch (error) {
             // 即使登出失败，也清除本地状态
             setUser(null);
@@ -110,4 +111,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+    const context = useContext(AuthContext);
+
+    if (!context) {
+        throw new Error("useAuth 必须在 AuthProvider 中使用");
+    }
+
+    return context;
 }
