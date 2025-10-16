@@ -138,7 +138,24 @@ export async function getPlaylistDetail(id: number) {
     throw new ApiError(404, '歌单不存在');
   }
 
-  return playlist;
+  // 字段映射：将数据库的 cover 字段映射为前端的 coverUrl
+  return {
+    ...playlist,
+    coverUrl: playlist.cover,
+    creator: playlist.user,
+    creatorId: playlist.userId,
+    _count: {
+      songs: playlist.playlistSongs.length,
+      followers: 0, // TODO: 需要添加收藏功能时计算
+    },
+    // 包含歌曲列表（转换为Song类型）
+    songs: playlist.playlistSongs.map(ps => ({
+      ...ps.song,
+      // 确保包含关联的艺术家和专辑信息
+      artist: ps.song.artist,
+      album: ps.song.album,
+    }))
+  };
 }
 
 /**

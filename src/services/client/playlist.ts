@@ -60,7 +60,7 @@ export async function getPlaylistById(id: number): Promise<PlaylistDetailRespons
     throw new Error(error.message || '获取歌单详情失败');
   }
 
-  return response.json();
+  return handleApiResponse<PlaylistDetailResponse>(response);
 }
 
 /**
@@ -75,12 +75,7 @@ export async function createPlaylist(data: PlaylistFormData): Promise<Playlist> 
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || '创建歌单失败');
-  }
-
-  return response.json();
+  return handleApiResponse<Playlist>(response);
 }
 
 /**
@@ -95,12 +90,7 @@ export async function updatePlaylist(id: number, data: PlaylistFormData): Promis
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || '更新歌单失败');
-  }
-
-  return response.json();
+  return handleApiResponse<Playlist>(response);
 }
 
 /**

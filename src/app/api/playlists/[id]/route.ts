@@ -14,7 +14,8 @@ function parsePlaylistId(param: string) {
 
 export async function GET(_request: NextRequest, context: { params: { id: string } }) {
   try {
-    const id = parsePlaylistId(context.params.id);
+    const { id: idParam } = await context.params;
+    const id = parsePlaylistId(idParam);
     const [playlist, currentUser] = await Promise.all([getPlaylistDetail(id), getOptionalUser()]);
 
     if (!playlist.isPublic && (!currentUser || currentUser.id !== playlist.userId)) {
@@ -35,7 +36,8 @@ export async function GET(_request: NextRequest, context: { params: { id: string
 export async function PUT(request: NextRequest, context: { params: { id: string } }) {
   try {
     const user = await requireUser();
-    const id = parsePlaylistId(context.params.id);
+    const { id: idParam } = await context.params;
+    const id = parsePlaylistId(idParam);
 
     const body = await request.json();
     const payload = playlistUpdateSchema.parse(body);
@@ -49,7 +51,8 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
 export async function DELETE(_request: NextRequest, context: { params: { id: string } }) {
   try {
     const user = await requireUser();
-    const id = parsePlaylistId(context.params.id);
+    const { id: idParam } = await context.params;
+    const id = parsePlaylistId(idParam);
     await deletePlaylist(id, user.id);
     return successResponse({ message: '删除成功' });
   } catch (error) {
