@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (error) {
             // 如果获取失败（比如 token 过期），清除用户状态
             setUser(null);
+            // 不在这里重新抛出错误，避免无限重试
         }
     }, []);
 
