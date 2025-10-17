@@ -61,10 +61,10 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
   // 如果认证状态还在加载中，显示加载状态
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">正在验证权限...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+          <p className="text-slate-500">正在验证权限...</p>
         </div>
       </div>
     );
@@ -73,10 +73,10 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
   // 如果用户未登录，显示加载状态而不是渲染子组件
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">正在跳转到登录页...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+          <p className="text-slate-500">正在跳转到登录页...</p>
         </div>
       </div>
     );
@@ -115,11 +115,11 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-slate-100 flex">
       {/* 侧边栏 */}
-      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:shadow-lg lg:bg-white">
-        <div className="flex items-center justify-center h-16 px-6 bg-blue-600">
-          <h1 className="text-xl font-bold text-white">管理后台</h1>
+      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:shadow-lg lg:bg-white lg:border-r lg:border-slate-200">
+        <div className="flex items-center justify-center h-16 px-6 bg-indigo-600">
+          <h1 className="text-xl font-semibold text-indigo-50 tracking-wide">管理后台</h1>
         </div>
 
         <nav className="flex-1 mt-8">
@@ -132,13 +132,13 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
                   href={item.href}
                   className={`group flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors ${
                     isActive
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      ? 'bg-indigo-100 text-indigo-700 shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-200/70 hover:text-slate-800'
                   }`}
                 >
                   <item.icon
                     className={`mr-3 h-5 w-5 flex-shrink-0 ${
-                      isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
+                      isActive ? 'text-indigo-500' : 'text-slate-400 group-hover:text-slate-500'
                     }`}
                   />
                   {item.name}
@@ -149,7 +149,7 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
         </nav>
 
         {/* 用户信息 */}
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4 border-t border-slate-200 bg-slate-50">
           <div className="flex items-center">
             <Avatar className="h-8 w-8 flex-shrink-0">
               <AvatarImage src={user.avatar ?? undefined} alt={user.name || user.username} />
@@ -158,10 +158,10 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
               </AvatarFallback>
             </Avatar>
             <div className="ml-3 flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-semibold text-slate-800 truncate">
                 {user.name || user.username}
               </p>
-              <p className="text-xs text-gray-500 truncate">
+              <p className="text-xs text-slate-500 truncate">
                 {user.email}
               </p>
             </div>
@@ -169,7 +169,7 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
               variant="ghost"
               size="sm"
               onClick={handleLogout}
-              className="ml-2 flex-shrink-0"
+              className="ml-2 flex-shrink-0 text-slate-500 hover:text-indigo-600"
             >
               <LogOut className="h-4 w-4" />
             </Button>
@@ -181,12 +181,12 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
       <div className="lg:pl-64 flex flex-col flex-1">
         {/* 移动端顶部栏 */}
         <div className="lg:hidden">
-          <div className="flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200">
+          <div className="flex items-center justify-between h-16 px-4 bg-white border-b border-slate-200">
             <div className="flex items-center">
               <Button variant="ghost" size="sm">
                 <Menu className="h-5 w-5" />
               </Button>
-              <h1 className="ml-3 text-lg font-semibold text-gray-900">管理后台</h1>
+              <h1 className="ml-3 text-lg font-semibold text-slate-800">管理后台</h1>
             </div>
             <Avatar className="h-8 w-8">
               <AvatarImage src={user.avatar ?? undefined} alt={user.name || user.username} />
@@ -198,19 +198,19 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
         </div>
 
         {/* 桌面端顶部导航栏 */}
-        <header className="hidden lg:block bg-white shadow-sm border-b border-gray-200">
+        <header className="hidden lg:block bg-white shadow-sm border-b border-slate-200">
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* 面包屑 */}
               <nav className="flex">
-                <ol className="flex items-center space-x-2 text-sm text-gray-500">
+                <ol className="flex items-center space-x-2 text-sm text-slate-500">
                   <li>
-                    <Link href="/admin" className="hover:text-gray-700">
+                    <Link href="/admin" className="hover:text-slate-700">
                       首页
                     </Link>
                   </li>
                   <li>/</li>
-                  <li className="text-gray-900">
+                  <li className="text-slate-700">
                     {navigation.find(item => item.current)?.name || '管理后台'}
                   </li>
                 </ol>

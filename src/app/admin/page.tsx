@@ -90,7 +90,7 @@ export default function AdminDashboard() {
       title: '歌曲总数',
       value: stats?.totalSongs || 0,
       icon: Music,
-      color: 'bg-blue-500',
+      color: 'bg-indigo-500',
       change: '+12%',
       changeType: 'positive' as const,
     },
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
       title: '歌手总数',
       value: stats?.totalArtists || 0,
       icon: User,
-      color: 'bg-green-500',
+      color: 'bg-teal-500',
       change: '+5%',
       changeType: 'positive' as const,
     },
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
       title: '专辑总数',
       value: stats?.totalAlbums || 0,
       icon: Disc,
-      color: 'bg-purple-500',
+      color: 'bg-sky-500',
       change: '+8%',
       changeType: 'positive' as const,
     },
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
       title: '歌单总数',
       value: stats?.totalPlaylists || 0,
       icon: BarChart3,
-      color: 'bg-orange-500',
+      color: 'bg-amber-500',
       change: '+15%',
       changeType: 'positive' as const,
     },
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
       title: '用户总数',
       value: stats?.totalUsers || 0,
       icon: Users,
-      color: 'bg-pink-500',
+      color: 'bg-rose-500',
       change: '+22%',
       changeType: 'positive' as const,
     },
@@ -134,10 +134,10 @@ export default function AdminDashboard() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600">系统概览和统计信息</p>
+            <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
+            <p className="text-slate-500">系统概览和统计信息</p>
           </div>
-          <div className="h-8 w-32 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-8 w-32 bg-slate-200 rounded animate-pulse"></div>
         </div>
 
         {/* 统计卡片骨架 */}
@@ -145,10 +145,10 @@ export default function AdminDashboard() {
           {Array.from({ length: 5 }).map((_, index) => (
             <Card key={index} className="p-6">
               <div className="flex items-center">
-                <div className="h-12 w-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                <div className="h-12 w-12 bg-slate-200 rounded-lg animate-pulse"></div>
                 <div className="ml-4 flex-1">
-                  <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
-                  <div className="h-6 bg-gray-200 rounded animate-pulse w-16"></div>
+                  <div className="h-4 bg-slate-200 rounded animate-pulse mb-2"></div>
+                  <div className="h-6 bg-slate-200 rounded animate-pulse w-16"></div>
                 </div>
               </div>
             </Card>
@@ -157,14 +157,14 @@ export default function AdminDashboard() {
 
         {/* 最近活动骨架 */}
         <Card className="p-6">
-          <div className="h-6 bg-gray-200 rounded animate-pulse mb-4"></div>
+          <div className="h-6 bg-slate-200 rounded animate-pulse mb-4"></div>
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
               <div key={index} className="flex items-center space-x-4">
-                <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="h-8 w-8 bg-slate-200 rounded-full animate-pulse"></div>
                 <div className="flex-1">
-                  <div className="h-4 bg-gray-200 rounded animate-pulse mb-1"></div>
-                  <div className="h-3 bg-gray-200 rounded animate-pulse w-24"></div>
+                  <div className="h-4 bg-slate-200 rounded animate-pulse mb-1"></div>
+                  <div className="h-3 bg-slate-200 rounded animate-pulse w-24"></div>
                 </div>
               </div>
             ))}
@@ -179,9 +179,9 @@ export default function AdminDashboard() {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <BarChart3 className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-red-600 mb-2">加载失败</h2>
-          <p className="text-gray-600">{error.message}</p>
+          <BarChart3 className="w-16 h-16 text-rose-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-rose-600 mb-2">加载失败</h2>
+          <p className="text-slate-500">{error.message}</p>
         </div>
       </div>
     );
@@ -190,17 +190,17 @@ export default function AdminDashboard() {
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'song':
-        return <Music className="h-4 w-4 text-blue-500" />;
+        return <Music className="h-4 w-4 text-indigo-500" />;
       case 'artist':
-        return <User className="h-4 w-4 text-green-500" />;
+        return <User className="h-4 w-4 text-teal-500" />;
       case 'album':
-        return <Disc className="h-4 w-4 text-purple-500" />;
+        return <Disc className="h-4 w-4 text-sky-500" />;
       case 'playlist':
-        return <BarChart3 className="h-4 w-4 text-orange-500" />;
+        return <BarChart3 className="h-4 w-4 text-amber-500" />;
       case 'user':
-        return <Users className="h-4 w-4 text-pink-500" />;
+        return <Users className="h-4 w-4 text-rose-500" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+        return <Clock className="h-4 w-4 text-slate-400" />;
     }
   };
 
@@ -238,11 +238,11 @@ export default function AdminDashboard() {
       {/* 页面标题 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">系统概览和统计信息</p>
+          <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
+          <p className="text-slate-500">系统概览和统计信息</p>
         </div>
-        <div className="flex items-center text-sm text-gray-500">
-          <TrendingUp className="h-4 w-4 mr-1 text-green-500" />
+        <div className="flex items-center text-sm text-slate-500">
+          <TrendingUp className="h-4 w-4 mr-1 text-emerald-500" />
           系统运行正常
         </div>
       </div>
@@ -250,16 +250,16 @@ export default function AdminDashboard() {
       {/* 统计卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {statCards.map((card, index) => (
-          <Card key={index} className="p-6">
+          <Card key={index} className="p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center">
-              <div className={`${card.color} p-3 rounded-lg`}>
+              <div className={`${card.color} p-3 rounded-xl shadow-sm`}>
                 <card.icon className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4 flex-1">
-                <p className="text-sm font-medium text-gray-600">{card.title}</p>
-                <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+                <p className="text-sm font-medium text-slate-500">{card.title}</p>
+                <p className="text-2xl font-bold text-slate-800">{card.value}</p>
                 <div className={`flex items-center text-xs mt-1 ${
-                  card.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
+                  card.changeType === 'positive' ? 'text-emerald-600' : 'text-rose-500'
                 }`}>
                   <TrendingUp className="h-3 w-3 mr-1" />
                   {card.change}
@@ -271,20 +271,20 @@ export default function AdminDashboard() {
       </div>
 
       {/* 最近活动 */}
-      <Card className="p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">最近活动</h2>
+      <Card className="p-6 border border-slate-200 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">最近活动</h2>
         {stats?.recentActivity && stats.recentActivity.length > 0 ? (
           <div className="space-y-4">
             {stats.recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+              <div key={index} className="flex items-center space-x-4 p-3 hover:bg-indigo-50/60 rounded-lg transition-colors">
                 <div className="flex-shrink-0">
                   {getActivityIcon(activity.type)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-medium text-slate-700 truncate">
                     {getActivityText(activity)} "{activity.name}"
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-slate-500">
                     {formatTime(activity.timestamp)}
                   </p>
                 </div>
@@ -293,8 +293,8 @@ export default function AdminDashboard() {
           </div>
         ) : (
           <div className="text-center py-8">
-            <Clock className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">暂无最近活动</p>
+            <Clock className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+            <p className="text-slate-500">暂无最近活动</p>
           </div>
         )}
       </Card>

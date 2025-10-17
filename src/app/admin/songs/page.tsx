@@ -239,15 +239,15 @@ export default function AdminSongsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">歌曲管理</h1>
-            <p className="text-gray-600">管理系统中的所有歌曲</p>
+            <h1 className="text-2xl font-bold text-slate-800">歌曲管理</h1>
+            <p className="text-slate-500">管理系统中的所有歌曲</p>
           </div>
-          <div className="h-10 w-32 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-10 w-32 bg-slate-200 rounded animate-pulse"></div>
         </div>
-        <Card className="p-6">
+        <Card className="p-6 border border-slate-200 shadow-sm">
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="h-12 bg-gray-200 rounded animate-pulse"></div>
+              <div key={index} className="h-12 bg-slate-200 rounded animate-pulse"></div>
             ))}
           </div>
         </Card>
@@ -260,9 +260,9 @@ export default function AdminSongsPage() {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <Music className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-red-600 mb-2">加载失败</h2>
-          <p className="text-gray-600 mb-4">{error.message}</p>
+          <Music className="w-16 h-16 text-rose-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-rose-600 mb-2">加载失败</h2>
+          <p className="text-slate-500 mb-4">{error.message}</p>
           <Button onClick={() => loadSongs(currentPage, searchQuery)}>
             重试
           </Button>
@@ -276,8 +276,8 @@ export default function AdminSongsPage() {
       {/* 页面标题和操作 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">歌曲管理</h1>
-          <p className="text-gray-600">管理系统中的所有歌曲</p>
+          <h1 className="text-2xl font-bold text-slate-800">歌曲管理</h1>
+          <p className="text-slate-500">管理系统中的所有歌曲</p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
@@ -367,7 +367,7 @@ export default function AdminSongsPage() {
       <form onSubmit={handleSearch}>
         <div className="flex gap-4">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
             <Input
               placeholder="搜索歌曲名称..."
               value={searchQuery}
@@ -479,7 +479,7 @@ export default function AdminSongsPage() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleDeleteSong(song)}
-                          className="text-red-600 focus:text-red-600"
+                          className="text-rose-600 focus:text-rose-600"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           删除
@@ -492,11 +492,11 @@ export default function AdminSongsPage() {
             ) : (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-12">
-                  <Music className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <Music className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-slate-700 mb-2">
                     {searchQuery ? '没有找到匹配的歌曲' : '还没有添加任何歌曲'}
                   </h3>
-                  <p className="text-gray-500">
+                  <p className="text-slate-500">
                     {searchQuery ? '试试其他关键词' : '点击上方按钮添加第一首歌曲'}
                   </p>
                 </TableCell>
@@ -517,7 +517,7 @@ export default function AdminSongsPage() {
           >
             上一页
           </Button>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-slate-500">
             第 {currentPage} 页，共 {totalPages} 页
           </span>
           <Button
