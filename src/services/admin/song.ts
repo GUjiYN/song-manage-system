@@ -40,6 +40,45 @@ async function handleApiResponse<T>(response: Response): Promise<T> {
   return result as T;
 }
 
+type AdminArtist = {
+  id: number;
+  name: string;
+  avatar: string | null;
+  description: string | null;
+  country: string | null;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    songs: number;
+    albums: number;
+  };
+};
+
+type PaginatedAdminResponse<T> = {
+  items: T[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+};
+
+function normalizeArtist(artist: AdminArtist): Artist {
+  return {
+    id: artist.id,
+    name: artist.name,
+    avatar: artist.avatar ?? undefined,
+    bio: artist.description ?? undefined,
+    createdAt: artist.createdAt,
+    updatedAt: artist.updatedAt,
+    _count: artist._count
+      ? {
+          songs: artist._count.songs,
+          albums: artist._count.albums,
+        }
+      : undefined,
+  };
+}
+
 // ==================== 歌曲管理 ====================
 
 /**
@@ -121,13 +160,21 @@ export async function getArtists(params: ArtistQueryParams = {}): Promise<Pagina
   const searchParams = new URLSearchParams();
 
   if (params.page) searchParams.append('page', params.page.toString());
-  if (params.limit) searchParams.append('limit', params.limit.toString());
+  if (params.limit) searchParams.append('pageSize', params.limit.toString());
   if (params.search) searchParams.append('search', params.search);
 
   const url = `${API_BASE}/artists${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
   const response = await fetch(url);
-  return handleApiResponse<PaginatedArtistResponse>(response);
+  const result = await handleApiResponse<PaginatedAdminResponse<AdminArtist>>(response);
+
+  return {
+    artists: result.items.map(normalizeArtist),
+    page: result.page,
+    limit: result.pageSize,
+    totalPages: result.totalPages,
+    totalCount: result.total,
+  };
 }
 
 /**
@@ -135,37 +182,52 @@ export async function getArtists(params: ArtistQueryParams = {}): Promise<Pagina
  */
 export async function getArtistById(id: number): Promise<Artist> {
   const response = await fetch(`${API_BASE}/artists/${id}`);
-  return handleApiResponse<Artist>(response);
+  const result = await handleApiResponse<AdminArtist>(response);
+  return normalizeArtist(result);
 }
 
 /**
  * 创建歌手
  */
 export async function createArtist(data: ArtistFormData): Promise<Artist> {
+  const payload = {
+    name: data.name,
+    avatar: data.avatar?.trim() || undefined,
+    description: data.bio?.trim() || undefined,
+  };
+
   const response = await fetch(`${API_BASE}/artists`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 
-  return handleApiResponse<Artist>(response);
+  const result = await handleApiResponse<AdminArtist>(response);
+  return normalizeArtist(result);
 }
 
 /**
  * 更新歌手
  */
 export async function updateArtist(id: number, data: ArtistFormData): Promise<Artist> {
+  const payload = {
+    name: data.name,
+    avatar: data.avatar?.trim() || undefined,
+    description: data.bio?.trim() || undefined,
+  };
+
   const response = await fetch(`${API_BASE}/artists/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 
-  return handleApiResponse<Artist>(response);
+  const result = await handleApiResponse<AdminArtist>(response);
+  return normalizeArtist(result);
 }
 
 /**

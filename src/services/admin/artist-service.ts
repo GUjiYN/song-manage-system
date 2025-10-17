@@ -15,6 +15,12 @@ const artistSelect = {
   country: true,
   createdAt: true,
   updatedAt: true,
+  _count: {
+    select: {
+      songs: true,
+      albums: true,
+    },
+  },
 } satisfies Prisma.ArtistSelect;
 
 type Artist = Prisma.ArtistGetPayload<{ select: typeof artistSelect }>;
