@@ -120,13 +120,7 @@ export async function getMyPlaylists(params: PlaylistQueryParams = {}): Promise<
   const url = `${API_BASE}/my${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
   const response = await fetch(url);
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || '获取我的歌单失败');
-  }
-
-  return response.json();
+  return handleApiResponse<PlaylistsResponse>(response);
 }
 
 /**
@@ -142,13 +136,7 @@ export async function getFollowedPlaylists(params: PlaylistQueryParams = {}): Pr
   const url = `${API_BASE}/followed${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
   const response = await fetch(url);
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || '获取收藏的歌单失败');
-  }
-
-  return response.json();
+  return handleApiResponse<PlaylistsResponse>(response);
 }
 
 /**
