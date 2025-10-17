@@ -44,6 +44,7 @@ import {
 import { getSongs, createSong, updateSong, deleteSong } from '@/services/admin/song';
 import { Song, SongFormData, SongQueryParams } from '@/types/song';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 export default function AdminSongsPage() {
   const [songs, setSongs] = useState<Song[]>([]);
@@ -60,7 +61,7 @@ export default function AdminSongsPage() {
   // 表单数据
   const [formData, setFormData] = useState<SongFormData>({
     title: '',
-    duration: 0,
+    duration: '',
     coverUrl: '',
     fileUrl: '',
     albumId: 0,
@@ -108,7 +109,7 @@ export default function AdminSongsPage() {
   const resetForm = () => {
     setFormData({
       title: '',
-      duration: 0,
+      duration: '',
       coverUrl: '',
       fileUrl: '',
       albumId: 0,
@@ -141,7 +142,7 @@ export default function AdminSongsPage() {
     setEditingSong(song);
     setFormData({
       title: song.title,
-      duration: song.duration,
+      duration: song.duration ?? '',
       coverUrl: song.coverUrl || '',
       fileUrl: song.fileUrl || '',
       albumId: song.albumId,
@@ -187,10 +188,49 @@ export default function AdminSongsPage() {
   };
 
   // 格式化时长
-  const formatDuration = (seconds: number) => {
+  const formatSeconds = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const parseDurationToSeconds = (value?: string | null) => {
+    if (!value) {
+      return 0;
+    }
+
+    const trimmed = value.trim();
+    const match = trimmed.match(/^(\d{1,2}):([0-5]\d)$/);
+    if (match) {
+      const minutes = Number(match[1]);
+      const seconds = Number(match[2]);
+      return minutes * 60 + seconds;
+    }
+
+    const numeric = Number(trimmed);
+    if (Number.isFinite(numeric) && numeric >= 0) {
+      return Math.floor(numeric);
+    }
+
+    return 0;
+  };
+
+  const formatDuration = (value?: string | null) => {
+    if (!value) {
+      return '--:--';
+    }
+
+    const trimmed = value.trim();
+    if (/^\d{1,2}:[0-5]\d$/.test(trimmed)) {
+      return trimmed;
+    }
+
+    const seconds = parseDurationToSeconds(trimmed);
+    if (seconds === 0) {
+      return trimmed;
+    }
+
+    return formatSeconds(seconds);
   };
 
   // 加载状态
@@ -265,13 +305,13 @@ export default function AdminSongsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="duration">时长（秒） *</Label>
+                <Label htmlFor="duration">时长（MM:SS） *</Label>
                 <Input
                   id="duration"
-                  type="number"
-                  value={formData.duration}
-                  onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 0 })}
-                  placeholder="输入时长（秒）"
+                  value={formData.duration ?? ''}
+                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                  placeholder="例如 03:45"
+                  pattern="^\\d{1,2}:[0-5]\\d$"
                   required
                 />
               </div>
@@ -340,11 +380,11 @@ export default function AdminSongsPage() {
       </form>
 
       {/* 歌曲列表 */}
-      <Card>
+      <Card className="border border-slate-200 shadow-sm">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>歌曲名称</TableHead>
+            <TableRow className="bg-slate-50/80 backdrop-blur">
+              <TableHead className="w-[320px]">歌曲</TableHead>
               <TableHead>歌手</TableHead>
               <TableHead>专辑</TableHead>
               <TableHead>时长</TableHead>
@@ -355,34 +395,74 @@ export default function AdminSongsPage() {
           <TableBody>
             {songs.length > 0 ? (
               songs.map((song) => (
-                <TableRow key={song.id}>
+                <TableRow
+                  key={song.id}
+                  className="group transition-colors hover:bg-slate-50/70 focus-within:bg-slate-50/70"
+                >
                   <TableCell className="font-medium">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center gap-4">
                       {song.coverUrl ? (
                         <img
                           src={song.coverUrl}
                           alt={song.title}
-                          className="w-10 h-10 rounded object-cover"
+                          className="w-12 h-12 rounded-lg object-cover shadow-sm ring-1 ring-slate-200"
                         />
                       ) : (
-                        <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
-                          <Music className="w-5 h-5 text-gray-400" />
+                        <div className="w-12 h-12 bg-slate-200 rounded-lg flex items-center justify-center text-slate-500 ring-1 ring-slate-200">
+                          <Music className="w-5 h-5" />
                         </div>
                       )}
                       <div>
-                        <div className="font-medium">{song.title}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-slate-900 group-hover:text-slate-800">
+                            {song.title}
+                          </span>
+                          <Badge
+                            variant="secondary"
+                            className="hidden sm:inline-flex bg-slate-100 text-slate-600 border-slate-200"
+                          >
+                            #{song.id}
+                          </Badge>
+                        </div>
+                        <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                          <Badge
+                            variant="outline"
+                            className="border-slate-200 bg-slate-50 text-slate-600"
+                          >
+                            {song.artist?.name || `歌手ID ${song.artistId}`}
+                          </Badge>
+                          {song.album?.name && (
+                            <Badge
+                              variant="outline"
+                              className="border-slate-200 bg-slate-50 text-slate-600"
+                            >
+                              {song.album.name}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="ml-auto h-8 w-8 shrink-0 rounded-full text-slate-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:text-slate-900 pointer-events-none group-hover:pointer-events-auto"
+                      >
+                        <Play className="h-4 w-4" />
+                      </Button>
                     </div>
                   </TableCell>
-                  <TableCell>{song.artist?.name || `ID: ${song.artistId}`}</TableCell>
-                  <TableCell>{song.album?.name || `ID: ${song.albumId}`}</TableCell>
+                  <TableCell className="text-slate-600">
+                    {song.artist?.name || `ID: ${song.artistId}`}
+                  </TableCell>
+                  <TableCell className="text-slate-600">
+                    {song.album?.name || `ID: ${song.albumId}`}
+                  </TableCell>
                   <TableCell>
-                    <div className="flex items-center">
-                      <Clock className="w-4 h-4 mr-1 text-gray-400" />
+                    <div className="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
+                      <Clock className="mr-1 h-3.5 w-3.5 text-slate-400" />
                       {formatDuration(song.duration)}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-slate-600">
                     {new Date(song.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell className="text-right">
@@ -472,13 +552,13 @@ export default function AdminSongsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-duration">时长（秒） *</Label>
+              <Label htmlFor="edit-duration">时长（MM:SS） *</Label>
               <Input
                 id="edit-duration"
-                type="number"
-                value={formData.duration}
-                onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 0 })}
-                placeholder="输入时长（秒）"
+                value={formData.duration ?? ''}
+                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                placeholder="例如 03:45"
+                pattern="^\\d{1,2}:[0-5]\\d$"
                 required
               />
             </div>

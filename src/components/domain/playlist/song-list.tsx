@@ -16,11 +16,50 @@ interface SongListProps {
   className?: string;
 }
 
-// 格式化时长
-function formatDuration(seconds: number): string {
+// 时长处理工具
+function formatSeconds(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+function parseDurationToSeconds(value?: string | null): number {
+  if (!value) {
+    return 0;
+  }
+
+  const trimmed = value.trim();
+  const match = trimmed.match(/^(\d{1,2}):([0-5]\d)$/);
+  if (match) {
+    const minutes = Number(match[1]);
+    const seconds = Number(match[2]);
+    return minutes * 60 + seconds;
+  }
+
+  const numeric = Number(trimmed);
+  if (Number.isFinite(numeric) && numeric >= 0) {
+    return Math.floor(numeric);
+  }
+
+  return 0;
+}
+
+function formatDuration(value?: string | null): string {
+  if (!value) {
+    return '--:--';
+  }
+
+  const trimmed = value.trim();
+  if (/^\d{1,2}:[0-5]\d$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  const seconds = parseDurationToSeconds(trimmed);
+  if (seconds === 0) {
+    return trimmed;
+  }
+
+  return formatSeconds(seconds);
 }
 
 export function SongList({
@@ -138,7 +177,13 @@ export function SongList({
           共 {songs.length} 首歌曲
         </div>
         <div>
-          总时长: {formatDuration(songs.reduce((total, song) => total + song.duration, 0))}
+          总时长: {(() => {
+            const totalSeconds = songs.reduce(
+              (total, song) => total + parseDurationToSeconds(song.duration),
+              0
+            );
+            return totalSeconds > 0 ? formatSeconds(totalSeconds) : '--:--';
+          })()}
         </div>
       </div>
     </div>

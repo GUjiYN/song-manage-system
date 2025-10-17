@@ -8,7 +8,7 @@ import { User } from './auth';
 export interface Song {
   id: number;
   title: string;
-  duration: number; // 时长（秒）
+  duration: string | null; // 时长（mm:ss）
   artistId: number;
   artist: Artist;
   albumId: number;

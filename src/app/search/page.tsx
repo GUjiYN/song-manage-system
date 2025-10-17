@@ -195,11 +195,24 @@ export default function SearchPage() {
     { value: 'albums', label: '专辑', icon: Disc },
   ];
 
-  // 格式化时长
-  const formatDuration = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  const formatDuration = (value?: string | null) => {
+    if (!value) {
+      return '--:--';
+    }
+
+    const trimmed = value.trim();
+    if (/^\d{1,2}:[0-5]\d$/.test(trimmed)) {
+      return trimmed;
+    }
+
+    const numeric = Number(trimmed);
+    if (Number.isFinite(numeric) && numeric >= 0) {
+      const minutes = Math.floor(numeric / 60);
+      const seconds = Math.floor(numeric % 60);
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    return trimmed;
   };
 
   return (

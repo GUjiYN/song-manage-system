@@ -5,10 +5,10 @@
 export interface Song {
   id: number;
   title: string;
-  duration: number; // 时长（秒）
+  duration: string | null; // 时长（mm:ss）
   coverUrl?: string;
   fileUrl?: string;
-  albumId: number;
+  albumId: number | null;
   artistId: number;
   createdAt: string;
   updatedAt: string;
@@ -22,7 +22,7 @@ export interface Album {
   id: number;
   name: string;
   coverUrl?: string;
-  releaseDate?: string;
+  releaseDate?: string | null;
   artistId: number;
   createdAt: string;
   updatedAt: string;
@@ -52,10 +52,10 @@ export interface Artist {
 // 表单数据类型
 export interface SongFormData {
   title: string;
-  duration: number;
+  duration?: string;
   coverUrl?: string;
   fileUrl?: string;
-  albumId: number;
+  albumId: number | null;
   artistId: number;
 }
 

@@ -54,6 +54,35 @@ type AdminArtist = {
   };
 };
 
+type AdminAlbum = {
+  id: number;
+  title: string;
+  cover: string | null;
+  releaseDate: string | null;
+  artistId: number;
+  createdAt: string;
+  updatedAt: string;
+  artist?: AdminArtist | null;
+  _count?: {
+    songs?: number;
+  };
+};
+
+type AdminSong = {
+  id: number;
+  title: string;
+  duration: string | null;
+  cover: string | null;
+  fileUrl: string | null;
+  lyrics: string | null;
+  artistId: number;
+  albumId: number | null;
+  createdAt: string;
+  updatedAt: string;
+  artist?: AdminArtist | null;
+  album?: AdminAlbum | null;
+};
+
 type PaginatedAdminResponse<T> = {
   items: T[];
   page: number;
@@ -79,6 +108,40 @@ function normalizeArtist(artist: AdminArtist): Artist {
   };
 }
 
+function normalizeAlbum(album?: AdminAlbum | null): Album | undefined {
+  if (!album) {
+    return undefined;
+  }
+
+  return {
+    id: album.id,
+    name: album.title,
+    coverUrl: album.cover ?? undefined,
+    releaseDate: album.releaseDate,
+    artistId: album.artistId,
+    createdAt: album.createdAt,
+    updatedAt: album.updatedAt,
+    artist: album.artist ? normalizeArtist(album.artist) : undefined,
+    _count: album._count?.songs !== undefined ? { songs: album._count.songs } : undefined,
+  };
+}
+
+function normalizeSong(song: AdminSong): Song {
+  return {
+    id: song.id,
+    title: song.title,
+    duration: song.duration ?? null,
+    coverUrl: song.cover ?? undefined,
+    fileUrl: song.fileUrl ?? undefined,
+    albumId: song.albumId ?? null,
+    artistId: song.artistId,
+    createdAt: song.createdAt,
+    updatedAt: song.updatedAt,
+    artist: song.artist ? normalizeArtist(song.artist) : undefined,
+    album: normalizeAlbum(song.album),
+  };
+}
+
 // ==================== 歌曲管理 ====================
 
 /**
@@ -88,7 +151,7 @@ export async function getSongs(params: SongQueryParams = {}): Promise<PaginatedS
   const searchParams = new URLSearchParams();
 
   if (params.page) searchParams.append('page', params.page.toString());
-  if (params.limit) searchParams.append('limit', params.limit.toString());
+  if (params.limit) searchParams.append('pageSize', params.limit.toString());
   if (params.search) searchParams.append('search', params.search);
   if (params.artistId) searchParams.append('artistId', params.artistId.toString());
   if (params.albumId) searchParams.append('albumId', params.albumId.toString());
@@ -96,7 +159,15 @@ export async function getSongs(params: SongQueryParams = {}): Promise<PaginatedS
   const url = `${API_BASE}/songs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
   const response = await fetch(url);
-  return handleApiResponse<PaginatedSongResponse>(response);
+  const result = await handleApiResponse<PaginatedAdminResponse<AdminSong>>(response);
+
+  return {
+    songs: result.items.map(normalizeSong),
+    page: result.page,
+    limit: result.pageSize,
+    totalPages: result.totalPages,
+    totalCount: result.total,
+  };
 }
 
 /**
@@ -104,37 +175,58 @@ export async function getSongs(params: SongQueryParams = {}): Promise<PaginatedS
  */
 export async function getSongById(id: number): Promise<Song> {
   const response = await fetch(`${API_BASE}/songs/${id}`);
-  return handleApiResponse<Song>(response);
+  const result = await handleApiResponse<AdminSong>(response);
+  return normalizeSong(result);
 }
 
 /**
  * 创建歌曲
  */
 export async function createSong(data: SongFormData): Promise<Song> {
+  const payload = {
+    title: data.title,
+    duration: data.duration?.trim() || undefined,
+    fileUrl: data.fileUrl?.trim() || undefined,
+    cover: data.coverUrl?.trim() || undefined,
+    artistId: data.artistId,
+    albumId: data.albumId || undefined,
+  };
+
   const response = await fetch(`${API_BASE}/songs`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 
-  return handleApiResponse<Song>(response);
+  const result = await handleApiResponse<AdminSong>(response);
+  return normalizeSong(result);
 }
 
 /**
  * 更新歌曲
  */
 export async function updateSong(id: number, data: SongFormData): Promise<Song> {
+  const payload = {
+    title: data.title,
+    duration: data.duration?.trim() || undefined,
+    fileUrl: data.fileUrl?.trim() || undefined,
+    cover: data.coverUrl?.trim() || undefined,
+    artistId: data.artistId,
+    albumId: data.albumId || undefined,
+  };
+
   const response = await fetch(`${API_BASE}/songs/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 
-  return handleApiResponse<Song>(response);
+  const result = await handleApiResponse<AdminSong>(response);
+  return normalizeSong(result);
 }
 
 /**
