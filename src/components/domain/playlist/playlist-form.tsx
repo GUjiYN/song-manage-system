@@ -21,6 +21,7 @@ interface PlaylistFormProps {
   submitText: string;
   onCancel?: () => void;
   showCancel?: boolean;
+  inDialog?: boolean; // 是否在弹窗中使用
 }
 
 export function PlaylistForm({
@@ -30,7 +31,8 @@ export function PlaylistForm({
   title,
   submitText,
   onCancel,
-  showCancel = true
+  showCancel = true,
+  inDialog = false
 }: PlaylistFormProps) {
   const { user } = useAuth();
 
@@ -114,22 +116,8 @@ export function PlaylistForm({
     }
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      {/* 页面头部 */}
-      <div className="flex items-center gap-4 mb-8">
-        {onCancel && (
-          <Button variant="ghost" onClick={onCancel}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            返回
-          </Button>
-        )}
-        <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
-      </div>
-
-      {/* 表单卡片 */}
-      <Card className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
+  const formContent = (
+    <form onSubmit={handleSubmit} className="space-y-6">
           {/* 歌单名称 */}
           <div className="space-y-2">
             <Label htmlFor="name">
@@ -278,6 +266,30 @@ export function PlaylistForm({
             </Button>
           </div>
         </form>
+  );
+
+  // 在弹窗中使用时，直接返回表单内容
+  if (inDialog) {
+    return formContent;
+  }
+
+  // 在页面中使用时，包含完整的页面布局
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-2xl">
+      {/* 页面头部 */}
+      <div className="flex items-center gap-4 mb-8">
+        {onCancel && (
+          <Button variant="ghost" onClick={onCancel}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            返回
+          </Button>
+        )}
+        <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+      </div>
+
+      {/* 表单卡片 */}
+      <Card className="p-6">
+        {formContent}
       </Card>
     </div>
   );

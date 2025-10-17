@@ -6,11 +6,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Search, Music } from 'lucide-react';
+import { Search, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PlaylistGrid } from '@/components/domain/playlist/playlist-grid';
 import { PlaylistGridSkeleton } from '@/components/domain/playlist/playlist-skeleton';
+import { PlaylistDialog } from '@/components/domain/playlist/playlist-dialog';
 import { getMyPlaylists, deletePlaylist } from '@/services/client/playlist';
 import { PlaylistQueryParams } from '@/types/playlist';
 import { useAuth } from '@/contexts/auth-context';
@@ -88,6 +89,12 @@ export default function LibraryPage() {
     }
   };
 
+  // 处理创建歌单成功
+  const handleCreateSuccess = async (newPlaylist: any) => {
+    // 重新加载歌单列表
+    await loadPlaylists(currentPage, searchQuery);
+  };
+
   // 处理编辑歌单
   const handleEditPlaylist = (playlistId: number) => {
     router.push(`/playlists/edit/${playlistId}`);
@@ -163,13 +170,7 @@ export default function LibraryPage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">我的音乐库</h1>
             <p className="text-gray-600">管理你创建的歌单</p>
           </div>
-          <Button
-            onClick={() => router.push('/playlists/create')}
-            className="shrink-0"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            创建歌单
-          </Button>
+          <PlaylistDialog onCreateSuccess={handleCreateSuccess} />
         </div>
 
         {/* 搜索栏 */}
@@ -237,13 +238,13 @@ export default function LibraryPage() {
               }
             </p>
             {!searchQuery && (
-              <Button
-                onClick={() => router.push('/playlists/create')}
-                size="lg"
+              <PlaylistDialog
+                onCreateSuccess={handleCreateSuccess}
               >
-                <Plus className="w-4 h-4 mr-2" />
-                创建第一个歌单
-              </Button>
+                <Button size="lg">
+                  创建第一个歌单
+                </Button>
+              </PlaylistDialog>
             )}
           </div>
         )}
