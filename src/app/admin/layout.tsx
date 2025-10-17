@@ -4,7 +4,6 @@
 
 "use client";
 
-import { useRouter } from 'next/navigation';
 import { ReactNode } from 'react';
 import React from 'react';
 import Link from 'next/link';
@@ -15,12 +14,12 @@ import {
   User,
   Disc,
   LogOut,
-  Menu,
-  X
+  Menu
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/auth-context';
+import { getDefaultRedirectPath, isAdminRole } from '@/lib/auth-redirect';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
@@ -52,12 +51,11 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
       return;
     }
 
-    // TODO: 检查用户是否是管理员
-    // if (user.role !== 'admin') {
-    //   setIsRedirecting(true);
-    //   window.location.href = '/';
-    //   return;
-    // }
+    if (!isAdminRole(user.role)) {
+      setIsRedirecting(true);
+      window.location.href = getDefaultRedirectPath(user.role);
+      return;
+    }
   }, [authLoading, user, isRedirecting]);
 
   // 如果认证状态还在加载中，显示加载状态
@@ -119,7 +117,7 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* 侧边栏 */}
-      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0">
+      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:shadow-lg lg:bg-white">
         <div className="flex items-center justify-center h-16 px-6 bg-blue-600">
           <h1 className="text-xl font-bold text-white">管理后台</h1>
         </div>
@@ -154,7 +152,7 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
         <div className="p-4 border-t border-gray-200">
           <div className="flex items-center">
             <Avatar className="h-8 w-8 flex-shrink-0">
-              <AvatarImage src={user.avatar} alt={user.name || user.username} />
+              <AvatarImage src={user.avatar ?? undefined} alt={user.name || user.username} />
               <AvatarFallback>
                 {(user.name || user.username || 'U').charAt(0).toUpperCase()}
               </AvatarFallback>
@@ -191,7 +189,7 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
               <h1 className="ml-3 text-lg font-semibold text-gray-900">管理后台</h1>
             </div>
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user.avatar} alt={user.name || user.username} />
+              <AvatarImage src={user.avatar ?? undefined} alt={user.name || user.username} />
               <AvatarFallback>
                 {(user.name || user.username || 'U').charAt(0).toUpperCase()}
               </AvatarFallback>

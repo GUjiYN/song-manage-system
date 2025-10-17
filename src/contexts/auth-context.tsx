@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import * as authService from "@/services/client/auth";
 import type { User, LoginFormData, RegisterFormData } from "@/types/auth";
+import { getDefaultRedirectPath, isRedirectAllowedForRole } from "@/lib/auth-redirect";
 
 interface AuthContextType {
     user: User | null;
@@ -53,7 +54,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const userData = await authService.login(data);
                 setUser(userData);
                 toast.success(`欢迎回来，${userData.name || userData.username}！`);
-                const target = options?.redirectTo || "/";
+                const fallbackTarget = getDefaultRedirectPath(userData.role);
+                const explicitTarget = options?.redirectTo;
+                const target =
+                    explicitTarget &&
+                    isRedirectAllowedForRole(userData.role, explicitTarget)
+                        ? explicitTarget
+                        : fallbackTarget;
                 router.push(target);
             } catch (error) {
                 if (error instanceof Error) {
