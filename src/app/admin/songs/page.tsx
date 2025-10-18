@@ -384,12 +384,12 @@ export default function AdminSongsPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/80 backdrop-blur">
-              <TableHead className="w-[320px]">歌曲</TableHead>
-              <TableHead>歌手</TableHead>
-              <TableHead>专辑</TableHead>
-              <TableHead>时长</TableHead>
-              <TableHead>创建时间</TableHead>
-              <TableHead className="text-right">操作</TableHead>
+              <TableHead className="w-[320px] pl-6 py-3">歌曲</TableHead>
+              <TableHead className="py-3">歌手</TableHead>
+              <TableHead className="py-3">专辑</TableHead>
+              <TableHead className="py-3">时长</TableHead>
+              <TableHead className="py-3">创建时间</TableHead>
+              <TableHead className="text-right pr-6 py-3">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -399,7 +399,7 @@ export default function AdminSongsPage() {
                   key={song.id}
                   className="group transition-colors hover:bg-slate-50/70 focus-within:bg-slate-50/70"
                 >
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium pl-6">
                     <div className="flex items-center gap-4">
                       {song.coverUrl ? (
                         <img
@@ -465,7 +465,7 @@ export default function AdminSongsPage() {
                   <TableCell className="text-slate-600">
                     {new Date(song.createdAt).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right pr-6">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button

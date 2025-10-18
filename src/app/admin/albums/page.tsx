@@ -319,20 +319,20 @@ export default function AdminAlbumsPage() {
       <Card className="border border-slate-200 shadow-sm">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>专辑名称</TableHead>
-              <TableHead>歌手</TableHead>
-              <TableHead>歌曲数量</TableHead>
-              <TableHead>发行日期</TableHead>
-              <TableHead>创建时间</TableHead>
-              <TableHead className="text-right">操作</TableHead>
+            <TableRow className="bg-slate-50/80 backdrop-blur">
+              <TableHead className="pl-6 py-3">专辑名称</TableHead>
+              <TableHead className="py-3">歌手</TableHead>
+              <TableHead className="py-3">歌曲数量</TableHead>
+              <TableHead className="py-3">发行日期</TableHead>
+              <TableHead className="py-3">创建时间</TableHead>
+              <TableHead className="text-right pr-6 py-3">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {albums.length > 0 ? (
               albums.map((album) => (
                 <TableRow key={album.id}>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium pl-6">
                     <div className="flex items-center space-x-3">
                       {album.coverUrl ? (
                         <img
@@ -374,7 +374,7 @@ export default function AdminAlbumsPage() {
                   <TableCell>
                     {new Date(album.createdAt).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right pr-6">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button

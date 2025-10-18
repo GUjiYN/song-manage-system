@@ -385,11 +385,11 @@ export default function AdminUsersPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/80 backdrop-blur">
-              <TableHead>用户</TableHead>
-              <TableHead>角色</TableHead>
-              <TableHead>邮箱</TableHead>
-              <TableHead>创建时间</TableHead>
-              <TableHead className="text-right">操作</TableHead>
+              <TableHead className="pl-6 py-3">用户</TableHead>
+              <TableHead className="py-3">角色</TableHead>
+              <TableHead className="py-3">邮箱</TableHead>
+              <TableHead className="py-3">创建时间</TableHead>
+              <TableHead className="text-right pr-6 py-3">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -399,7 +399,7 @@ export default function AdminUsersPage() {
                   key={user.id}
                   className="group transition-colors hover:bg-slate-50/70 focus-within:bg-slate-50/70"
                 >
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium pl-6">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={user.avatar ?? undefined} alt={user.name || user.username} />
@@ -430,7 +430,7 @@ export default function AdminUsersPage() {
                       {new Date(user.createdAt).toLocaleDateString()}
                     </div>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right pr-6">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button

@@ -305,20 +305,20 @@ export default function AdminArtistsPage() {
       <Card className="border border-slate-200 shadow-sm">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>歌手名称</TableHead>
-              <TableHead>歌曲数量</TableHead>
-              <TableHead>专辑数量</TableHead>
-              <TableHead>个人简介</TableHead>
-              <TableHead>创建时间</TableHead>
-              <TableHead className="text-right">操作</TableHead>
+            <TableRow className="bg-slate-50/80 backdrop-blur">
+              <TableHead className="pl-6 py-3">歌手名称</TableHead>
+              <TableHead className="py-3">歌曲数量</TableHead>
+              <TableHead className="py-3">专辑数量</TableHead>
+              <TableHead className="py-3">个人简介</TableHead>
+              <TableHead className="py-3">创建时间</TableHead>
+              <TableHead className="text-right pr-6 py-3">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {artists.length > 0 ? (
               artists.map((artist) => (
                 <TableRow key={artist.id}>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium pl-6">
                     <div className="flex items-center space-x-3">
                       {artist.avatar ? (
                         <img
@@ -356,7 +356,7 @@ export default function AdminArtistsPage() {
                   <TableCell>
                     {new Date(artist.createdAt).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right pr-6">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
