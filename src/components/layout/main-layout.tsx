@@ -5,15 +5,17 @@
 
 "use client";
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Search, Music, ListMusic, Heart, Compass, Library, Home, Menu, X } from 'lucide-react';
+import { Search, Music, ListMusic, Heart, Compass, Library, Home, Menu, X, ChevronRight, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaylistDialog } from '@/components/domain/playlist/playlist-dialog';
 import { useAuth } from '@/contexts/auth-context';
+import { getMyPlaylists, getFollowedPlaylists } from '@/services/client/playlist';
+import type { Playlist } from '@/types/playlist';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -26,13 +28,18 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [myPlaylists, setMyPlaylists] = useState<Playlist[]>([]);
+  const [followedPlaylists, setFollowedPlaylists] = useState<Playlist[]>([]);
+  const [loadingMy, setLoadingMy] = useState(false);
+  const [loadingFollowed, setLoadingFollowed] = useState(false);
+  const [myOpen, setMyOpen] = useState(true);
+  const [followedOpen, setFollowedOpen] = useState(true);
 
   // 导航菜单项
   const navItems = [
     { name: '首页', href: '/', icon: Home },
     { name: '发现广场', href: '/discover', icon: Compass },
     { name: '我的音乐库', href: '/library', icon: Library },
-    { name: '搜索', href: '/search', icon: Search },
   ];
 
   // 处理搜索
@@ -46,18 +53,52 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
   // 处理创建歌单成功
   const handleCreateSuccess = (newPlaylist: any) => {
     onCreatePlaylist?.(newPlaylist);
+    reloadSidebarPlaylists();
   };
+
+
+
+  useEffect(() => {
+    reloadSidebarPlaylists();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   // 如果用户未登录，只显示内容（不显示需要登录的功能）
   if (!user) {
     return <>{children}</>;
   }
 
+  // 加载侧边栏歌单列表
+  const reloadSidebarPlaylists = async () => {
+    if (!user) return;
+    try {
+      setLoadingMy(true);
+      const my = await getMyPlaylists({ page: 1, limit: 50 });
+      setMyPlaylists(my.data ?? []);
+    } catch {
+      setMyPlaylists([]);
+    } finally {
+      setLoadingMy(false);
+    }
+
+    try {
+      setLoadingFollowed(true);
+      const followed = await getFollowedPlaylists({ page: 1, limit: 50 });
+      setFollowedPlaylists(followed.data ?? []);
+    } catch {
+      // 后端可能未实现收藏接口，容错处理
+      setFollowedPlaylists([]);
+    } finally {
+      setLoadingFollowed(false);
+    }
+  };
+
+
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="flex">
         {/* 侧边栏 - 桌面端 */}
-        <aside className="hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:w-72 bg-white border-r border-slate-200 z-40">
+        <aside className="hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:w-56 bg-white border-r border-slate-200 z-40">
           <div className="flex-1 flex flex-col py-8 px-6 overflow-y-auto">
             {/* Logo 和系统名称 */}
             <div className="mb-8 pb-6 border-b border-slate-200">
@@ -97,116 +138,98 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
               })}
             </nav>
 
-            {/* 创建歌单按钮 */}
+            {/* 我创建的歌单 */}
             <div className="mt-6">
-              <PlaylistDialog onCreateSuccess={handleCreateSuccess}>
-                <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
-                  <Music className="w-4 h-4 mr-2" />
-                  创建歌单
-                </Button>
-              </PlaylistDialog>
+              <button
+                className="w-full flex items-center justify-between px-2 py-2 text-slate-700 hover:bg-slate-100 rounded-md"
+                onClick={() => setMyOpen(!myOpen)}
+              >
+                <div className="flex items-center gap-2">
+                  <ListMusic className="w-5 h-5" />
+                  <span className="text-sm font-medium">我创建的歌单</span>
+                </div>
+                {myOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </button>
+              {myOpen && (
+                <div className="mt-2 pl-2">
+                  {loadingMy ? (
+                    <p className="text-xs text-slate-500 px-2 py-1">加载中...</p>
+                  ) : myPlaylists.length > 0 ? (
+                    <ul className="space-y-1">
+                      {myPlaylists.map((p) => (
+                        <li key={p.id}>
+                          <Link
+                            href={`/playlists/${p.id}`}
+                            className={`flex items-center gap-2 px-2 py-2 rounded-md text-sm ${
+                              pathname === `/playlists/${p.id}`
+                                ? 'bg-indigo-50 text-indigo-700'
+                                : 'text-slate-600 hover:bg-slate-100'
+                            }`}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                            <span className="truncate" title={p.name}>{p.name}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-slate-500 px-2 py-1">暂无歌单</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* 我收藏的歌单 */}
+            <div className="mt-4">
+              <button
+                className="w-full flex items-center justify-between px-2 py-2 text-slate-700 hover:bg-slate-100 rounded-md"
+                onClick={() => setFollowedOpen(!followedOpen)}
+              >
+                <div className="flex items-center gap-2">
+                  <Heart className="w-5 h-5" />
+                  <span className="text-sm font-medium">我收藏的歌单</span>
+                </div>
+                {followedOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </button>
+              {followedOpen && (
+                <div className="mt-2 pl-2">
+                  {loadingFollowed ? (
+                    <p className="text-xs text-slate-500 px-2 py-1">加载中...</p>
+                  ) : followedPlaylists.length > 0 ? (
+                    <ul className="space-y-1">
+                      {followedPlaylists.map((p) => (
+                        <li key={p.id}>
+                          <Link
+                            href={`/playlists/${p.id}`}
+                            className={`flex items-center gap-2 px-2 py-2 rounded-md text-sm ${
+                              pathname === `/playlists/${p.id}`
+                                ? 'bg-indigo-50 text-indigo-700'
+                                : 'text-slate-600 hover:bg-slate-100'
+                            }`}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                            <span className="truncate" title={p.name}>{p.name}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-slate-500 px-2 py-1">暂无收藏或尚未开通</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </aside>
 
-        {/* 移动端侧边栏 */}
-        {sidebarOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            {/* 背景遮罩 */}
-            <div
-              className="absolute inset-0 bg-black/50"
-              onClick={() => setSidebarOpen(false)}
-            />
-
-            {/* 侧边栏内容 */}
-            <aside className="absolute left-0 top-0 bottom-0 w-72 bg-white border-r border-slate-200">
-              <div className="flex-1 flex flex-col py-8 px-6 h-full overflow-y-auto">
-                {/* 关闭按钮 */}
-                <div className="flex justify-end mb-4">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <X className="w-5 h-5" />
-                  </Button>
-                </div>
-
-                {/* Logo 和系统名称 */}
-                <div className="mb-8 pb-6 border-b border-slate-200">
-                  <Link href="/" className="flex items-center gap-3" onClick={() => setSidebarOpen(false)}>
-                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <Music className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h1 className="text-xl font-bold text-slate-900">歌单管理</h1>
-                      <p className="text-xs text-slate-500">Playlist Manager</p>
-                    </div>
-                  </Link>
-                </div>
-
-                {/* 导航菜单 */}
-                <nav className="flex-1 space-y-2">
-                  <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-                    导航
-                  </p>
-                  {navItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = pathname === item.href;
-                    return (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                          isActive
-                            ? 'bg-indigo-50 text-indigo-700 font-medium'
-                            : 'text-slate-600 hover:bg-slate-100'
-                        }`}
-                      >
-                        <Icon className="w-5 h-5 flex-shrink-0" />
-                        <span>{item.name}</span>
-                      </Link>
-                    );
-                  })}
-                </nav>
-
-                {/* 创建歌单按钮 */}
-                <div className="mt-6">
-                  <PlaylistDialog onCreateSuccess={(playlist) => {
-                    handleCreateSuccess(playlist);
-                    setSidebarOpen(false);
-                  }}>
-                    <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
-                      <Music className="w-4 h-4 mr-2" />
-                      创建歌单
-                    </Button>
-                  </PlaylistDialog>
-                </div>
-              </div>
-            </aside>
-          </div>
-        )}
-
         {/* 主内容区 */}
-        <main className="flex-1 lg:pl-72">
+        <main className="flex-1 lg:pl-56">
           <div className="min-h-screen">
             {/* 顶部导航栏 */}
-            <div className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
+            <div className="sticky top-0 z-30">
               <div className="px-4 sm:px-6 lg:px-8 py-4">
                 <div className="flex items-center justify-between gap-4">
-                  {/* 左侧：移动端菜单按钮 + 搜索框 */}
                   <div className="flex items-center gap-3 flex-1 max-w-2xl">
-                    {/* 移动端菜单按钮 */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="lg:hidden"
-                      onClick={() => setSidebarOpen(true)}
-                    >
-                      <Menu className="w-5 h-5" />
-                    </Button>
-
                     {/* 搜索框 */}
                     <form onSubmit={handleSearch} className="flex-1">
                       <div className="relative">
@@ -216,7 +239,7 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
                           placeholder="搜索歌单、歌曲、歌手..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="pl-10 h-11 bg-slate-50 border-slate-300 focus:border-indigo-500 focus:bg-white"
+                          className="pl-10 h-9 bg-slate-50 border-slate-300 focus:border-indigo-500 focus:bg-white"
                         />
                       </div>
                     </form>
