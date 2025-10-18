@@ -63,6 +63,7 @@ type AdminAlbum = {
   createdAt: string;
   updatedAt: string;
   artist?: AdminArtist | null;
+  songs?: unknown[]; // 服务端返回的完整歌曲数组
   _count?: {
     songs?: number;
   };
@@ -113,6 +114,9 @@ function normalizeAlbum(album?: AdminAlbum | null): Album | undefined {
     return undefined;
   }
 
+  // 计算歌曲数量，优先使用 _count，否则使用 songs 数组长度
+  const songCount = album._count?.songs ?? album.songs?.length;
+
   return {
     id: album.id,
     name: album.title,
@@ -122,7 +126,7 @@ function normalizeAlbum(album?: AdminAlbum | null): Album | undefined {
     createdAt: album.createdAt,
     updatedAt: album.updatedAt,
     artist: album.artist ? normalizeArtist(album.artist) : undefined,
-    _count: album._count?.songs !== undefined ? { songs: album._count.songs } : undefined,
+    _count: songCount !== undefined ? { songs: songCount } : undefined,
   };
 }
 
@@ -345,14 +349,22 @@ export async function getAlbums(params: AlbumQueryParams = {}): Promise<Paginate
   const searchParams = new URLSearchParams();
 
   if (params.page) searchParams.append('page', params.page.toString());
-  if (params.limit) searchParams.append('limit', params.limit.toString());
+  if (params.limit) searchParams.append('pageSize', params.limit.toString());
   if (params.search) searchParams.append('search', params.search);
   if (params.artistId) searchParams.append('artistId', params.artistId.toString());
 
   const url = `${API_BASE}/albums${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
   const response = await fetch(url);
-  return handleApiResponse<PaginatedAlbumResponse>(response);
+  const result = await handleApiResponse<PaginatedAdminResponse<AdminAlbum>>(response);
+
+  return {
+    albums: result.items.map(album => normalizeAlbum(album)!),
+    page: result.page,
+    limit: result.pageSize,
+    totalPages: result.totalPages,
+    totalCount: result.total,
+  };
 }
 
 /**
@@ -360,37 +372,66 @@ export async function getAlbums(params: AlbumQueryParams = {}): Promise<Paginate
  */
 export async function getAlbumById(id: number): Promise<Album> {
   const response = await fetch(`${API_BASE}/albums/${id}`);
-  return handleApiResponse<Album>(response);
+  const result = await handleApiResponse<AdminAlbum>(response);
+  const normalized = normalizeAlbum(result);
+  if (!normalized) {
+    throw new Error('专辑数据无效');
+  }
+  return normalized;
 }
 
 /**
  * 创建专辑
  */
 export async function createAlbum(data: AlbumFormData): Promise<Album> {
+  const payload = {
+    title: data.name,
+    cover: data.coverUrl?.trim() || undefined,
+    releaseDate: data.releaseDate?.trim() || undefined,
+    artistId: data.artistId,
+  };
+
   const response = await fetch(`${API_BASE}/albums`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 
-  return handleApiResponse<Album>(response);
+  const result = await handleApiResponse<AdminAlbum>(response);
+  const normalized = normalizeAlbum(result);
+  if (!normalized) {
+    throw new Error('创建的专辑数据无效');
+  }
+  return normalized;
 }
 
 /**
  * 更新专辑
  */
 export async function updateAlbum(id: number, data: AlbumFormData): Promise<Album> {
+  const payload = {
+    title: data.name,
+    cover: data.coverUrl?.trim() || undefined,
+    releaseDate: data.releaseDate?.trim() || undefined,
+    artistId: data.artistId,
+  };
+
   const response = await fetch(`${API_BASE}/albums/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 
-  return handleApiResponse<Album>(response);
+  const result = await handleApiResponse<AdminAlbum>(response);
+  const normalized = normalizeAlbum(result);
+  if (!normalized) {
+    throw new Error('更新的专辑数据无效');
+  }
+  return normalized;
 }
 
 /**
