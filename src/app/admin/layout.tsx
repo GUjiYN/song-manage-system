@@ -14,7 +14,8 @@ import {
   User,
   Disc,
   LogOut,
-  Menu
+  Menu,
+  Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -106,6 +107,12 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
       href: '/admin/albums',
       icon: Disc,
       current: pathname === '/admin/albums',
+    },
+    {
+      name: '用户管理',
+      href: '/admin/users',
+      icon: Users,
+      current: pathname === '/admin/users',
     },
   ];
 
