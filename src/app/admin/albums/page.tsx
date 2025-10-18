@@ -377,18 +377,25 @@ export default function AdminAlbumsPage() {
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="hover:bg-slate-100 transition-colors"
+                        >
+                          <MoreHorizontal className="h-4 w-4 text-slate-600" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEditAlbum(album)}>
+                      <DropdownMenuContent align="end" className="w-32">
+                        <DropdownMenuItem
+                          onClick={() => handleEditAlbum(album)}
+                          className="text-slate-600 hover:bg-slate-200/70 hover:text-slate-800 focus:bg-slate-200/70 focus:text-slate-800 cursor-pointer transition-colors"
+                        >
                           <Edit className="h-4 w-4 mr-2" />
                           编辑
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleDeleteAlbum(album)}
-                          className="text-rose-600 focus:text-rose-600"
+                          className="text-slate-600 hover:bg-slate-200/70 hover:text-slate-800 focus:bg-slate-200/70 focus:text-slate-800 cursor-pointer transition-colors"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           删除
