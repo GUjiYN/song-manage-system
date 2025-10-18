@@ -115,14 +115,61 @@ export async function createPlaylist(userId: number, payload: PlaylistCreatePayl
 }
 
 /**
- * 获取指定用户创建的歌单列表
+ * 获取指定用户创建的歌单列表，支持搜索与分页
  */
-export async function listUserPlaylists(userId: number) {
-  return prisma.playlist.findMany({
-    where: { userId },
-    orderBy: { createdAt: 'desc' },
-    include: playlistInclude,
-  });
+export async function listUserPlaylists(userId: number, params: { pagination: PaginationResult; search?: string | null }) {
+  const where: Prisma.PlaylistWhereInput = { userId };
+
+  if (params.search) {
+    where.AND = [
+      { userId },
+      {
+        OR: [
+          {
+            name: {
+              contains: params.search,
+            },
+          },
+          {
+            description: {
+              contains: params.search,
+            },
+          },
+        ],
+      },
+    ];
+  }
+
+  const [items, total] = await Promise.all([
+    prisma.playlist.findMany({
+      where,
+      include: playlistInclude,
+      orderBy: { createdAt: 'desc' },
+      skip: params.pagination.skip,
+      take: params.pagination.take,
+    }),
+    prisma.playlist.count({ where }),
+  ]);
+
+  // 字段映射：将数据库的 cover 字段映射为前端的 coverUrl
+  const mappedItems = items.map(item => ({
+    ...item,
+    coverUrl: item.cover,
+    creator: item.user,
+    creatorId: item.userId,
+    _count: {
+      songs: item.playlistSongs.length,
+      followers: 0, // TODO: 需要添加收藏功能时计算
+    }
+  }));
+
+  return {
+    playlists: mappedItems,
+    page: params.pagination.page,
+    limit: params.pagination.pageSize,
+    totalPages: Math.ceil(total / params.pagination.pageSize),
+    totalCount: total,
+  };
 }
 
 /**

@@ -54,11 +54,11 @@ export function PlaylistDialog({ children, onCreateSuccess }: PlaylistDialogProp
       // 关闭弹窗
       setOpen(false);
 
-      // 调用成功回调
+      // 调用成功回调（会自动刷新歌单列表）
       onCreateSuccess?.(newPlaylist);
 
-      // 跳转到新创建的歌单详情页
-      router.push(`/playlists/${newPlaylist.id}`);
+      // 不再自动跳转，保持在当前页面
+      // router.push(`/playlists/${newPlaylist.id}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '创建失败';
       toast.error(errorMessage);
