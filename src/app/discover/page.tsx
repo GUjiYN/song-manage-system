@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { PlaylistGrid } from '@/components/domain/playlist/playlist-grid';
+import { MainLayout } from '@/components/layout/main-layout';
 import { getPublicPlaylists } from '@/services/client/playlist';
 import { Playlist } from '@/types/playlist';
 import { Button } from '@/components/ui/button';
@@ -85,18 +86,18 @@ export default function DiscoverPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <MainLayout>
       {/* 页面标题 */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">发现歌单</h1>
-        <p className="text-gray-600">探索由其他用户创建的精彩歌单</p>
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">发现歌单</h1>
+        <p className="text-slate-600">探索由其他用户创建的精彩歌单</p>
       </div>
 
       {/* 搜索栏 */}
       <div className="mb-8">
         <div className="flex gap-3 max-w-2xl">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
             <Input
               type="text"
               placeholder="搜索歌单名称..."
@@ -148,10 +149,10 @@ export default function DiscoverPage() {
 
       {/* 没有更多内容提示 */}
       {!isLoading && !error && playlists.length > 0 && !hasMore && (
-        <div className="text-center mt-8 text-gray-500">
+        <div className="text-center mt-8 text-slate-500">
           已经到底啦～
         </div>
       )}
-    </div>
+    </MainLayout>
   );
 }

@@ -30,7 +30,7 @@ export function PlaylistGrid({
 
   // 正常显示
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ${className}`}>
+    <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8 ${className}`}>
       {playlists.map((playlist) => (
         <PlaylistCard
           key={playlist.id}

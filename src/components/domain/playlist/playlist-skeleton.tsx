@@ -10,34 +10,20 @@ interface PlaylistSkeletonProps {
 
 export function PlaylistSkeleton({ className = '' }: PlaylistSkeletonProps) {
   return (
-    <Card className={`overflow-hidden ${className}`}>
-      {/* 封面图骨架 */}
-      <div className="relative aspect-square bg-gray-200 animate-pulse" />
+    <div className={className}>
+      {/* 封面图骨架 - 正方形 */}
+      <div className="relative aspect-square bg-slate-200 rounded-lg animate-pulse shadow-md" />
 
-      {/* 歌单信息骨架 */}
-      <div className="p-4">
+      {/* 歌单信息骨架 - 显示在封面下方 */}
+      <div className="mt-3 space-y-2">
         {/* 标题骨架 */}
-        <div className="h-6 bg-gray-200 rounded animate-pulse mb-2" />
-
-        {/* 描述骨架 */}
-        <div className="space-y-2 mb-3">
-          <div className="h-4 bg-gray-200 rounded animate-pulse w-full" />
-          <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4" />
-        </div>
+        <div className="h-5 bg-slate-200 rounded animate-pulse w-full" />
+        <div className="h-5 bg-slate-200 rounded animate-pulse w-3/4" />
 
         {/* 元信息骨架 */}
-        <div className="flex items-center justify-between">
-          <div className="h-3 bg-gray-200 rounded animate-pulse w-20" />
-          <div className="flex items-center gap-3">
-            <div className="h-3 bg-gray-200 rounded animate-pulse w-12" />
-            <div className="h-3 bg-gray-200 rounded animate-pulse w-12" />
-          </div>
-        </div>
-
-        {/* 时间骨架 */}
-        <div className="h-3 bg-gray-200 rounded animate-pulse w-24 mt-2" />
+        <div className="h-3 bg-slate-200 rounded animate-pulse w-32" />
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -46,9 +32,9 @@ interface PlaylistGridSkeletonProps {
   className?: string;
 }
 
-export function PlaylistGridSkeleton({ count = 8, className = '' }: PlaylistGridSkeletonProps) {
+export function PlaylistGridSkeleton({ count = 12, className = '' }: PlaylistGridSkeletonProps) {
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ${className}`}>
+    <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8 ${className}`}>
       {Array.from({ length: count }).map((_, index) => (
         <PlaylistSkeleton key={index} />
       ))}
