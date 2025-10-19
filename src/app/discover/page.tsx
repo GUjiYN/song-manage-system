@@ -11,7 +11,7 @@ import { Playlist } from '@/types/playlist';
 import { PlaylistDetailInline } from '@/components/domain/playlist/playlist-detail-inline';
 import { getDiscoverData, type DiscoverData, type DiscoverCategory } from '@/services/client/discover';
 import { toast } from 'sonner';
-import { SongList } from '@/components/domain/playlist/song-list';
+import { LatestSongsList } from '@/components/domain/discover/latest-songs-list';
 
 export default function DiscoverPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -98,14 +98,12 @@ export default function DiscoverPage() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-xl font-semibold text-slate-900">最新音乐</h2>
-              {/* 可加“更多”链接 */}
             </div>
             {isLoading ? (
-              <SongList songs={[]} isLoading={true} />
+              <LatestSongsList songs={[]} isLoading={true} />
             ) : discover && discover.featuredSongs.length > 0 ? (
-              <SongList
+              <LatestSongsList
                 songs={discover.featuredSongs}
-                showAddToPlaylist
                 onAddToPlaylist={() => toast.info('添加到歌单功能即将上线~')}
               />
             ) : (
