@@ -120,7 +120,44 @@ export async function getMyPlaylists(params: PlaylistQueryParams = {}): Promise<
   const url = `${API_BASE}/my${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
   const response = await fetch(url);
-  return handleApiResponse<PlaylistsResponse>(response);
+  // 服务端历史实现返回 { playlists, page, limit, totalPages, totalCount }
+  // 新实现返回 { data, pagination }
+  const raw = await handleApiResponse<unknown>(response);
+
+  // 旧格式判断与映射
+  const isOldFormat = (v: unknown): v is { playlists: unknown[]; page?: unknown; limit?: unknown; totalPages?: unknown; totalCount?: unknown } => {
+    if (!v || typeof v !== 'object') return false;
+    const r = v as Record<string, unknown>;
+    return Array.isArray(r.playlists);
+  };
+
+  if (isOldFormat(raw)) {
+    return {
+      data: (raw.playlists as unknown[] as Playlist[]),
+      pagination: {
+        page: Number((raw as Record<string, unknown>).page ?? params.page ?? 1),
+        limit: Number((raw as Record<string, unknown>).limit ?? params.limit ?? 10),
+        total: Number((raw as Record<string, unknown>).totalCount ?? 0),
+        totalPages: Number((raw as Record<string, unknown>).totalPages ?? 0),
+      },
+    };
+  }
+
+  // 已是标准格式则直接返回
+  const isNewFormat = (v: unknown): v is PlaylistsResponse => {
+    if (!v || typeof v !== 'object') return false;
+    const r = v as Record<string, unknown>;
+    return Array.isArray(r.data as unknown[]) && !!r.pagination;
+  };
+  if (isNewFormat(raw)) {
+    return raw;
+  }
+
+  // 容错：兜底为空列表
+  return {
+    data: [],
+    pagination: { page: Number(params.page ?? 1), limit: Number(params.limit ?? 10), total: 0, totalPages: 0 },
+  };
 }
 
 /**
