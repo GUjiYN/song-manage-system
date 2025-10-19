@@ -8,10 +8,11 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Search, Music, ListMusic, Heart, Compass, Library, Home, ChevronRight, ChevronDown, Plus } from 'lucide-react';
+import { Search, Music, ListMusic, Heart, Compass, Library, Home, ChevronRight, ChevronDown, Plus, ArrowLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaylistDialog } from '@/components/domain/playlist/playlist-dialog';
+import { PlaylistDetailInline } from '@/components/domain/playlist/playlist-detail-inline';
 import { useAuth } from '@/contexts/auth-context';
 import { getMyPlaylists, getFollowedPlaylists } from '@/services/client/playlist';
 import type { Playlist } from '@/types/playlist';
@@ -33,6 +34,7 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
   const [loadingFollowed, setLoadingFollowed] = useState(false);
   const [myOpen, setMyOpen] = useState(true);
   const [followedOpen, setFollowedOpen] = useState(true);
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<number | null>(null);
 
   // 导航菜单
   const navItems = useMemo(
@@ -85,6 +87,18 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
   useEffect(() => {
     reloadSidebarPlaylists();
   }, [reloadSidebarPlaylists]);
+
+  // 监听全局事件，允许子页面触发内嵌详情
+  useEffect(() => {
+    const openHandler = (e: Event) => {
+      const custom = e as CustomEvent<number>;
+      setSelectedPlaylistId(custom.detail);
+    };
+    window.addEventListener('open-playlist-inline' as unknown as string, openHandler as EventListener);
+    return () => {
+      window.removeEventListener('open-playlist-inline' as unknown as string, openHandler as EventListener);
+    };
+  }, []);
 
   // 如果用户未登录，只显示内容（不显示需要登录的功能）
   if (!user) {
@@ -164,17 +178,17 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
                     <ul className="space-y-1">
                       {myPlaylists.map((p) => (
                         <li key={p.id}>
-                          <Link
-                            href={`/playlists/${p.id}`}
-                            className={`flex items-center gap-2 px-2 py-2 rounded-md text-sm ${
-                              pathname === `/playlists/${p.id}`
+                          <button
+                            onClick={() => setSelectedPlaylistId(p.id)}
+                            className={`w-full text-left flex items-center gap-2 px-2 py-2 rounded-md text-sm ${
+                              selectedPlaylistId === p.id
                                 ? 'bg-indigo-50 text-indigo-700'
                                 : 'text-slate-600 hover:bg-slate-100'
                             }`}
                           >
                             <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                             <span className="truncate" title={p.name}>{p.name}</span>
-                          </Link>
+                          </button>
                         </li>
                       ))}
                     </ul>
@@ -203,17 +217,17 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
                     <ul className="space-y-1">
                       {followedPlaylists.map((p) => (
                         <li key={p.id}>
-                          <Link
-                            href={`/playlists/${p.id}`}
-                            className={`flex items-center gap-2 px-2 py-2 rounded-md text-sm ${
-                              pathname === `/playlists/${p.id}`
+                          <button
+                            onClick={() => setSelectedPlaylistId(p.id)}
+                            className={`w-full text-left flex items-center gap-2 px-2 py-2 rounded-md text-sm ${
+                              selectedPlaylistId === p.id
                                 ? 'bg-indigo-50 text-indigo-700'
                                 : 'text-slate-600 hover:bg-slate-100'
                             }`}
                           >
                             <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                             <span className="truncate" title={p.name}>{p.name}</span>
-                          </Link>
+                          </button>
                         </li>
                       ))}
                     </ul>
@@ -234,6 +248,14 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
               <div className="px-4 sm:px-6 lg:px-8 py-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 flex-1 max-w-2xl">
+                    {/* 返回按钮（全局） */}
+                    <button
+                      onClick={() => router.back()}
+                      aria-label="返回"
+                      className="p-2 rounded-md hover:bg-slate-100 text-slate-600 hover:text-indigo-700"
+                    >
+                      <ArrowLeft className="w-5 h-5" />
+                    </button>
                     {/* 搜索 */}
                     <form onSubmit={handleSearch} className="flex-1">
                       <div className="relative">
@@ -273,9 +295,13 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
               </div>
             </div>
 
-            {/* 页面主体内容 */}
-            <div className="px-4 sm:px-6 lg:px-8 py-6">
-              {children}
+            {/* 页面主体内容：若选择了侧边栏歌单，则在当前页渲染详情 */}
+            <div className="px-6 py-6">
+              {selectedPlaylistId ? (
+                <PlaylistDetailInline id={selectedPlaylistId} />
+              ) : (
+                children
+              )}
             </div>
           </div>
         </main>

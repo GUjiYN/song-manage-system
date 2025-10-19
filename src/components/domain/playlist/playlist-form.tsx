@@ -229,13 +229,6 @@ export function PlaylistForm({
             />
           </div>
 
-          {/* 创建者信息 */}
-          {user && (
-            <div className="text-sm text-gray-500 bg-blue-50 p-3 rounded-lg">
-              创建者：{user.name || user.username} ({user.email})
-            </div>
-          )}
-
           {/* 操作按钮 */}
           <div className="flex gap-3 pt-4">
             {showCancel && onCancel && (

@@ -89,9 +89,6 @@ export function PlaylistDialog({ children, onCreateSuccess }: PlaylistDialogProp
             <Plus className="w-5 h-5" />
             创建新歌单
           </DialogTitle>
-          <DialogDescription>
-            创建一个属于你的歌单，开始整理喜欢的音乐吧～
-          </DialogDescription>
         </DialogHeader>
 
         <PlaylistForm

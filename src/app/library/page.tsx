@@ -1,6 +1,6 @@
 ﻿
 /**
- * 个人音乐库页（仅桌面端需求，已移除移动端专用代码）
+ * 个人音乐库页
  */
 
 "use client";
@@ -165,11 +165,10 @@ export default function LibraryPage() {
       {/* 用户信息与统计（桌面端） */}
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg font-semibold">
+          <div className="w-28 h-28 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg font-semibold">
             {(user?.name || user?.username || 'U').charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">我的音乐库</h1>
             <p className="text-slate-600">{user?.name || user?.username}</p>
           </div>
         </div>
@@ -194,19 +193,6 @@ export default function LibraryPage() {
               <Heart className="w-4 h-4 mr-2" /> 我收藏的
             </TabsTrigger>
           </TabsList>
-
-          <form onSubmit={handleSearch} className="w-80">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <Input
-                type="text"
-                placeholder={activeTab === 'created' ? '搜索创建的歌单...' : '搜索收藏的歌单...'}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </form>
         </div>
 
         {/* 我创建的歌单 */}
@@ -219,6 +205,7 @@ export default function LibraryPage() {
                 onEdit={(id) => router.push(`/playlists/edit/${id}`)}
                 onDelete={handleDeletePlaylist}
                 isDeleting={isDeleting}
+                onSelect={(id) => window.dispatchEvent(new CustomEvent('open-playlist-inline', { detail: id }))}
               />
 
               {totalPages > 1 && (
@@ -253,7 +240,10 @@ export default function LibraryPage() {
         <TabsContent value="followed" className="mt-6 space-y-6">
           {followedPlaylists.length > 0 ? (
             <>
-              <PlaylistGrid playlists={followedPlaylists} />
+              <PlaylistGrid
+                playlists={followedPlaylists}
+                onSelect={(id) => window.dispatchEvent(new CustomEvent('open-playlist-inline', { detail: id }))}
+              />
 
               {followedTotalPages > 1 && (
                 <div className="flex justify-center items-center gap-2 mt-8">

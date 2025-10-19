@@ -4,8 +4,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Clock, User, Music, Edit, Trash2, MoreHorizontal } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { User, Music, Edit, Trash2, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -22,6 +21,7 @@ interface PlaylistCardProps {
   onDelete?: (playlistId: number, playlistName: string) => void;
   isDeleting?: number | null;
   className?: string;
+  onSelect?: (playlistId: number) => void;
 }
 
 export function PlaylistCard({
@@ -30,7 +30,8 @@ export function PlaylistCard({
   onEdit,
   onDelete,
   isDeleting = null,
-  className = ''
+  className = '',
+  onSelect,
 }: PlaylistCardProps) {
   const handleEditClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -45,7 +46,16 @@ export function PlaylistCard({
   };
 
   const cardContent = (
-    <div className={`group cursor-pointer transition-all duration-200 ${className}`}>
+    <div
+      className={`group cursor-pointer transition-all duration-200 ${className}`}
+      onClick={(e) => {
+        if (onSelect) {
+          e.preventDefault();
+          e.stopPropagation();
+          onSelect(playlist.id);
+        }
+      }}
+    >
       {/* 封面容器 - 正方形 */}
       <div className="relative aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200">
         {/* 管理按钮 */}
@@ -57,6 +67,7 @@ export function PlaylistCard({
                   variant="secondary"
                   size="icon"
                   className="h-8 w-8 bg-white/90 hover:bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  data-inline-ignore
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -76,7 +87,7 @@ export function PlaylistCard({
                   disabled={isDeleting === playlist.id}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  {isDeleting === playlist.id ? '删除中...' : '删除'}
+                  {isDeleting === playlist.id ? '删除中..' : '删除'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -134,10 +145,10 @@ export function PlaylistCard({
           {playlist._count && (
             <div className="flex items-center gap-1">
               <Music className="w-3.5 h-3.5" />
-              <span>{playlist._count.songs}首</span>
+              <span>{playlist._count.songs}</span>
             </div>
           )}
-          <span className="text-slate-300">•</span>
+          <span className="text-slate-300">&middot;</span>
           <div className="flex items-center gap-1 line-clamp-1">
             <User className="w-3.5 h-3.5 flex-shrink-0" />
             <span className="truncate">{playlist.creator?.username || '未知'}</span>
@@ -147,10 +158,18 @@ export function PlaylistCard({
     </div>
   );
 
+  if (onSelect) {
+    return (
+      <div>
+        {cardContent}
+      </div>
+    );
+  }
+
   if (showActions) {
     // 在有管理按钮时，不使用 Link 包装，直接使用 onClick 事件
     return (
-      <div onClick={() => window.location.href = `/playlists/${playlist.id}`}>
+      <div onClick={() => (window.location.href = `/playlists/${playlist.id}`)}>
         {cardContent}
       </div>
     );

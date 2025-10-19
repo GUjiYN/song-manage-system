@@ -1,11 +1,10 @@
 /**
- * 歌曲列表组件
+ * 歌曲列表组件（统一样式：与 PlaylistDetailInline 对齐的表格风格）
  */
 
 import { Song } from '@/types/playlist';
-import { Clock, MoreHorizontal, Play, X } from 'lucide-react';
+import { Play, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 
 interface SongListProps {
   songs: Song[];
@@ -16,18 +15,16 @@ interface SongListProps {
   className?: string;
 }
 
-// 时长处理工具
+// 工具：格式化秒为 mm:ss
 function formatSeconds(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
+// 工具：解析时长字符串为秒（支持 mm:ss 或纯数字秒）
 function parseDurationToSeconds(value?: string | null): number {
-  if (!value) {
-    return 0;
-  }
-
+  if (!value) return 0;
   const trimmed = value.trim();
   const match = trimmed.match(/^(\d{1,2}):([0-5]\d)$/);
   if (match) {
@@ -35,30 +32,18 @@ function parseDurationToSeconds(value?: string | null): number {
     const seconds = Number(match[2]);
     return minutes * 60 + seconds;
   }
-
   const numeric = Number(trimmed);
-  if (Number.isFinite(numeric) && numeric >= 0) {
-    return Math.floor(numeric);
-  }
-
+  if (Number.isFinite(numeric) && numeric >= 0) return Math.floor(numeric);
   return 0;
 }
 
+// 对外：规范化展示的时长
 function formatDuration(value?: string | null): string {
-  if (!value) {
-    return '--:--';
-  }
-
+  if (!value) return '--:--';
   const trimmed = value.trim();
-  if (/^\d{1,2}:[0-5]\d$/.test(trimmed)) {
-    return trimmed;
-  }
-
+  if (/^\d{1,2}:[0-5]\d$/.test(trimmed)) return trimmed;
   const seconds = parseDurationToSeconds(trimmed);
-  if (seconds === 0) {
-    return trimmed;
-  }
-
+  if (seconds === 0) return trimmed;
   return formatSeconds(seconds);
 }
 
@@ -68,21 +53,13 @@ export function SongList({
   isOwner = false,
   onPlaySong,
   onRemoveSong,
-  className = ''
+  className = '',
 }: SongListProps) {
   if (isLoading) {
     return (
       <div className={`space-y-2 ${className}`}>
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg animate-pulse">
-            <div className="w-8 h-8 bg-gray-200 rounded"></div>
-            <div className="flex-1 space-y-2">
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-            </div>
-            <div className="w-16 h-4 bg-gray-200 rounded"></div>
-            {isOwner && <div className="w-8 h-8 bg-gray-200 rounded"></div>}
-          </div>
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="h-10 bg-slate-100 rounded animate-pulse" />
         ))}
       </div>
     );
@@ -91,73 +68,71 @@ export function SongList({
   if (!songs || songs.length === 0) {
     return (
       <div className={`text-center py-12 ${className}`}>
-        <div className="text-gray-400 mb-2">
-          <Play className="w-16 h-16 mx-auto" />
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-1">暂无歌曲</h3>
-        <p className="text-gray-500">
-          {isOwner ? '点击"添加歌曲"开始添加音乐到这个歌单' : '这个歌单还没有添加任何歌曲'}
+        <h3 className="text-lg font-medium text-slate-900 mb-1">暂无歌曲</h3>
+        <p className="text-slate-500">
+          {isOwner ? '点击“添加歌曲”开始添加音乐到这个歌单' : '这个歌单还没有添加任何歌曲'}
         </p>
       </div>
     );
   }
 
+  // 与 PlaylistDetailInline 对齐的列布局
+  const gridCols = isOwner
+    ? 'grid grid-cols-[56px_1fr_1fr_72px_48px]'
+    : 'grid grid-cols-[56px_1fr_1fr_72px]';
+
   return (
     <div className={`space-y-1 ${className}`}>
       {/* 表头 */}
-      <div className="flex items-center gap-4 px-4 py-2 text-sm text-gray-500 border-b">
-        <div className="w-8 text-center">#</div>
-        <div className="flex-1">标题</div>
-        <div className="w-48">专辑</div>
-        <div className="w-32">时长</div>
-        {isOwner && <div className="w-8"></div>}
+      <div className={`${gridCols} px-2 text-slate-500 text-xs font-medium gap-2 h-8 items-center`}>
+        <div className="pl-3">#</div>
+        <div>标题</div>
+        <div>专辑</div>
+        <div className="text-right pr-3">时长</div>
+        {isOwner && <div className="text-right pr-3">操作</div>}
       </div>
+      <div className="border-t border-slate-200" />
 
-      {/* 歌曲列表 */}
+      {/* 列表行 */}
       {songs.map((song, index) => (
         <div
           key={song.id}
-          className="group flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+          className={`${gridCols} gap-2 items-center h-14 hover:bg-slate-50 transition-colors border-b border-slate-100 group`}
         >
           {/* 序号 */}
-          <div className="w-8 text-center text-sm text-gray-500">
-            {index + 1}
+          <div className="pl-3 text-slate-400 text-sm tabular-nums">
+            {String(index + 1).padStart(2, '0')}
           </div>
 
           {/* 歌曲信息 */}
-          <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-gray-900 truncate">
-              {song.title}
-            </h4>
-            <p className="text-sm text-gray-500 truncate">
-              {song.artist.name}
-            </p>
+          <div className="min-w-0 flex items-center gap-3">
+            {/* 预留小封面位（未来可显示音轨或专辑封面）*/}
+            <div className="w-10 h-10 rounded bg-slate-200 overflow-hidden flex-shrink-0 hidden" />
+            <div className="min-w-0">
+              <p className="text-slate-900 truncate">{song.title}</p>
+              <p className="text-slate-500 text-xs truncate">{song.artist.name}</p>
+            </div>
           </div>
 
           {/* 专辑信息 */}
-          <div className="w-48 min-w-0 hidden sm:block">
-            <p className="text-sm text-gray-600 truncate">
-              {song.album.title}
-            </p>
-          </div>
+          <div className="text-slate-600 truncate">{song.album.title}</div>
 
           {/* 时长 */}
-          <div className="w-32 text-sm text-gray-500">
+          <div className="text-right pr-3 text-slate-500 text-sm tabular-nums">
             {formatDuration(song.duration)}
           </div>
 
-          {/* 操作按钮 */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onPlaySong?.(song)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <Play className="w-4 h-4" />
-            </Button>
-
-            {isOwner && (
+          {/* 操作列（仅拥有者显示）*/}
+          {isOwner && (
+            <div className="text-right pr-3 flex items-center justify-end gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onPlaySong?.(song)}
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Play className="w-4 h-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -166,22 +141,17 @@ export function SongList({
               >
                 <X className="w-4 h-4" />
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       ))}
 
       {/* 统计信息 */}
-      <div className="flex items-center justify-between px-4 py-3 text-sm text-gray-500 border-t">
+      <div className="flex items-center justify-between px-4 py-3 text-sm text-slate-500">
+        <div>共 {songs.length} 首歌曲</div>
         <div>
-          共 {songs.length} 首歌曲
-        </div>
-        <div>
-          总时长: {(() => {
-            const totalSeconds = songs.reduce(
-              (total, song) => total + parseDurationToSeconds(song.duration),
-              0
-            );
+          总时长 {(() => {
+            const totalSeconds = songs.reduce((total, song) => total + parseDurationToSeconds(song.duration), 0);
             return totalSeconds > 0 ? formatSeconds(totalSeconds) : '--:--';
           })()}
         </div>
@@ -189,3 +159,4 @@ export function SongList({
     </div>
   );
 }
+
