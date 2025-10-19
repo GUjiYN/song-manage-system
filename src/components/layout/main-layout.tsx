@@ -5,7 +5,7 @@
 
 "use client";
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Search, Music, ListMusic, Heart, Compass, Library, Home, Menu, X, ChevronRight, ChevronDown } from 'lucide-react';
@@ -50,6 +50,31 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
     }
   };
 
+  // 加载侧边栏歌单列表（useCallback，未登录短路）
+  const reloadSidebarPlaylists = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      setLoadingMy(true);
+      const my = await getMyPlaylists({ page: 1, limit: 50 });
+      setMyPlaylists(my.data ?? []);
+    } catch {
+      setMyPlaylists([]);
+    } finally {
+      setLoadingMy(false);
+    }
+
+    try {
+      setLoadingFollowed(true);
+      const followed = await getFollowedPlaylists({ page: 1, limit: 50 });
+      setFollowedPlaylists(followed.data ?? []);
+    } catch {
+      // 后端可能未实现收藏接口，容错处理
+      setFollowedPlaylists([]);
+    } finally {
+      setLoadingFollowed(false);
+    }
+  }, [user?.id]);
+
   // 处理创建歌单成功
   const handleCreateSuccess = (newPlaylist: any) => {
     onCreatePlaylist?.(newPlaylist);
@@ -60,8 +85,7 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
 
   useEffect(() => {
     reloadSidebarPlaylists();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [reloadSidebarPlaylists]);
 
   // 如果用户未登录，只显示内容（不显示需要登录的功能）
   if (!user) {
@@ -69,7 +93,7 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
   }
 
   // 加载侧边栏歌单列表
-  const reloadSidebarPlaylists = async () => {
+  const reloadSidebarPlaylistsLegacy = async () => {
     if (!user) return;
     try {
       setLoadingMy(true);
