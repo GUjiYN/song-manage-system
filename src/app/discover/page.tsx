@@ -7,48 +7,28 @@
 import { useState, useEffect } from 'react';
 import { PlaylistGrid } from '@/components/domain/playlist/playlist-grid';
 import { MainLayout } from '@/components/layout/main-layout';
-import { getPublicPlaylists } from '@/services/client/playlist';
 import { Playlist } from '@/types/playlist';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Search, RefreshCw } from 'lucide-react';
 import { PlaylistDetailInline } from '@/components/domain/playlist/playlist-detail-inline';
+import { getDiscoverData, type DiscoverData, type DiscoverCategory } from '@/services/client/discover';
+import { toast } from 'sonner';
+import { SongList } from '@/components/domain/playlist/song-list';
 
 export default function DiscoverPage() {
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isSearching, setIsSearching] = useState(false);
+  const [discover, setDiscover] = useState<DiscoverData | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<DiscoverCategory | null>(null);
 
-  // 详情视图：在本页内渲染，保持与“我创建的歌单”一致的样式
+  // 详情视图：在本页内渲染
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  const pageSize = 12;
-
-  // 加载歌单数据
-  const loadPlaylists = async (page: number = 1, search: string = '', append: boolean = false) => {
+  // 加载发现页数据
+  const loadDiscover = async (categoryId?: number) => {
     try {
-      if (!append) {
-        setIsLoading(true);
-      }
+      setIsLoading(true);
       setError(null);
-
-      const response = await getPublicPlaylists({
-        page,
-        limit: pageSize,
-        search: search.trim() || undefined,
-      });
-
-      if (append) {
-        setPlaylists((prev) => [...prev, ...response.data]);
-      } else {
-        setPlaylists(response.data);
-      }
-
-      setHasMore(response.pagination.page < response.pagination.totalPages);
+      const data = await getDiscoverData({ categoryId, limitSongs: 10, limitPlaylists: 12 });
+      setDiscover(data);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('加载失败'));
     } finally {
@@ -58,37 +38,8 @@ export default function DiscoverPage() {
 
   // 初始加载
   useEffect(() => {
-    loadPlaylists(1, searchQuery);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadDiscover();
   }, []);
-
-  // 搜索处理
-  const handleSearch = () => {
-    setCurrentPage(1);
-    setIsSearching(true);
-    loadPlaylists(1, searchQuery);
-  };
-
-  // 刷新处理
-  const handleRefresh = () => {
-    setCurrentPage(1);
-    setSearchQuery('');
-    loadPlaylists(1, '');
-  };
-
-  // 加载更多
-  const loadMore = () => {
-    const nextPage = currentPage + 1;
-    setCurrentPage(nextPage);
-    loadPlaylists(nextPage, searchQuery, true);
-  };
-
-  // 回车搜索
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
 
   // 点击卡片：在本页渲染内嵌详情（统一样式）
   const handleSelectPlaylist = (id: number) => {
@@ -97,38 +48,11 @@ export default function DiscoverPage() {
 
   return (
     <MainLayout>
-      {/* 标题与搜索：仅在未选择歌单时显示 */}
       {!selectedId && (
-        <>
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">发现歌单</h1>
-            <p className="text-slate-600">探索由其他用户创建的精彩歌单</p>
-          </div>
-
-          <div className="mb-8">
-            <div className="flex gap-3 max-w-2xl">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-                <Input
-                  type="text"
-                  placeholder="搜索歌单名称..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="pl-10"
-                />
-              </div>
-              <Button onClick={handleSearch} disabled={isLoading}>
-                <Search className="w-4 h-4 mr-2" />
-                搜索
-              </Button>
-              <Button variant="outline" onClick={handleRefresh} disabled={isLoading}>
-                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                刷新
-              </Button>
-            </div>
-          </div>
-        </>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">发现</h1>
+          <p className="text-slate-600">探索精选的歌曲和歌单</p>
+        </div>
       )}
 
       {/* 主内容：在页内展示歌单详情；未选择时显示网格 */}
@@ -137,36 +61,79 @@ export default function DiscoverPage() {
           <PlaylistDetailInline id={selectedId} />
         </div>
       ) : (
-        <PlaylistGrid
-          playlists={playlists}
-          isLoading={isLoading && !isSearching}
-          error={error}
-          className="min-h-[400px]"
-          onSelect={handleSelectPlaylist}
-        />
-      )}
-
-      {/* 加载更多按钮 */}
-      {!isLoading && !error && playlists.length > 0 && hasMore && !selectedId && (
-        <div className="flex justify-center mt-8">
-          <Button variant="outline" onClick={loadMore} disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                加载中..
-              </>
+        <div className="space-y-10">
+          {/* 分类筛选 */}
+          <div>
+            {error ? (
+              <p className="text-slate-600">{error.message}</p>
             ) : (
-              '加载更多'
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    loadDiscover(undefined);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-sm border ${!selectedCategory ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'text-slate-600 border-slate-200 hover:bg-slate-100'}`}
+                >
+                  全部
+                </button>
+                {discover?.categories?.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => {
+                      setSelectedCategory(c);
+                      loadDiscover(c.id);
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-sm border ${selectedCategory?.id === c.id ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'text-slate-600 border-slate-200 hover:bg-slate-100'}`}
+                    title={`共 ${c.songCount} 首`}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
             )}
-          </Button>
+          </div>
+
+          {/* 最新音乐 */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xl font-semibold text-slate-900">最新音乐</h2>
+              {/* 可加“更多”链接 */}
+            </div>
+            {isLoading ? (
+              <SongList songs={[]} isLoading={true} />
+            ) : discover && discover.featuredSongs.length > 0 ? (
+              <SongList
+                songs={discover.featuredSongs}
+                showAddToPlaylist
+                onAddToPlaylist={() => toast.info('添加到歌单功能即将上线~')}
+              />
+            ) : (
+              <div className="text-center text-slate-500 py-10">暂无推荐歌曲</div>
+            )}
+          </div>
+
+          {/* 热门歌单 */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xl font-semibold text-slate-900">热门歌单</h2>
+            </div>
+            {isLoading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-44 bg-slate-100 rounded-lg animate-pulse" />
+                ))}
+              </div>
+            ) : discover && discover.featuredPlaylists.length > 0 ? (
+              <PlaylistGrid playlists={discover.featuredPlaylists as unknown as Playlist[]} onSelect={handleSelectPlaylist} />
+            ) : (
+              <div className="text-center text-slate-500 py-10">暂无推荐歌单</div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* 没有更多内容提示 */}
-      {!isLoading && !error && playlists.length > 0 && !hasMore && !selectedId && (
-        <div className="text-center mt-8 text-slate-500">已经到底啦～</div>
-      )}
+      {/* 发现页不做分页，“更多”留待专页 */}
     </MainLayout>
   );
 }
-

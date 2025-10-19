@@ -13,6 +13,8 @@ interface SongListProps {
   onPlaySong?: (song: Song) => void;
   onRemoveSong?: (songId: number) => void;
   className?: string;
+  showAddToPlaylist?: boolean;
+  onAddToPlaylist?: (song: Song) => void;
 }
 
 // 工具：格式化秒为 mm:ss
@@ -54,6 +56,8 @@ export function SongList({
   onPlaySong,
   onRemoveSong,
   className = '',
+  showAddToPlaylist = false,
+  onAddToPlaylist,
 }: SongListProps) {
   if (isLoading) {
     return (
@@ -93,11 +97,11 @@ export function SongList({
       </div>
       <div className="border-t border-slate-200" />
 
-      {/* 列表行 */}
+      {/* 列表 */}
       {songs.map((song, index) => (
         <div
           key={song.id}
-          className={`${gridCols} gap-2 items-center h-14 hover:bg-slate-50 transition-colors border-b border-slate-100 group`}
+          className={`${gridCols} gap-2 items-center h-14 hover:bg-slate-50 transition-colors border-b border-slate-100 group relative`}
         >
           {/* 序号 */}
           <div className="pl-3 text-slate-400 text-sm tabular-nums">
@@ -140,6 +144,20 @@ export function SongList({
                 className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-600"
               >
                 <X className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+
+          {/* 非拥有者场景：悬浮显示“添加到歌单” */}
+          {!isOwner && showAddToPlaylist && (
+            <div className="absolute right-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onAddToPlaylist?.(song)}
+                className="opacity-0 group-hover:opacity-100 transition-opacity h-7 px-2 text-xs"
+              >
+                添加到歌单
               </Button>
             </div>
           )}
