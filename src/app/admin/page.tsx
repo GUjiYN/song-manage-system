@@ -259,39 +259,50 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-sm">
       {/* 页面标题 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
-          <p className="text-slate-500">系统概览和统计信息</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Dashboard</h1>
+          <p className="text-slate-500 mt-1">系统概览和统计信息</p>
         </div>
-        <div className="flex items-center text-sm text-slate-500">
-          <TrendingUp className="h-4 w-4 mr-1 text-emerald-500" />
+        <div className="flex items-center gap-2 text-sm bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full border border-emerald-200">
+          <TrendingUp className="h-4 w-4" />
           系统运行正常
         </div>
       </div>
 
-      {/* 统计卡片 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      {/* 统计卡片 - 渐变背景 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {statCards.map((card, index) => (
-          <Card key={index} className="p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center">
-              <div className={`${card.color} p-3 rounded-xl shadow-sm`}>
+          <div
+            key={index}
+            className={`relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br ${
+              index === 0 ? 'from-indigo-500 to-indigo-600' :
+              index === 1 ? 'from-teal-500 to-teal-600' :
+              index === 2 ? 'from-sky-500 to-sky-600' :
+              index === 3 ? 'from-amber-500 to-amber-600' :
+              'from-rose-500 to-rose-600'
+            } shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
+          >
+            {/* 装饰背景 */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
+
+            <div className="relative flex items-center">
+              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
                 <card.icon className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4 flex-1">
-                <p className="text-sm font-medium text-slate-500">{card.title}</p>
-                <p className="text-2xl font-bold text-slate-800">{card.value}</p>
-                <div className={`flex items-center text-xs mt-1 ${
-                  card.changeType === 'positive' ? 'text-emerald-600' : card.changeType === 'negative' ? 'text-rose-500' : 'text-slate-400'
-                }`}>
+                <p className="text-sm font-medium text-white/80">{card.title}</p>
+                <p className="text-3xl font-bold text-white mt-1">{card.value}</p>
+                <div className="flex items-center text-xs mt-2 text-white/90">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   {card.change}
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
 
@@ -302,7 +313,7 @@ export default function AdminDashboard() {
       {stats && <TrendCharts trendData={stats.trendData} />}
 
       {/* Top 排行榜 和 最近活动 (2列布局) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* 左侧: Top 排行榜 (2列) */}
         <div className="lg:col-span-2">
           {stats && (
@@ -316,15 +327,17 @@ export default function AdminDashboard() {
 
         {/* 右侧: 最近活动 (1列) */}
         <div className="lg:col-span-1">
-          <Card className="p-6 border border-slate-200 shadow-sm h-full">
-            <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-              <Clock className="h-5 w-5 mr-2 text-slate-500" />
+          <div className="backdrop-blur-sm bg-gradient-to-br from-amber-50/60 to-orange-50/40 rounded-2xl p-4 border border-amber-200/40 shadow-lg h-full">
+            <h2 className="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+              <div className="bg-amber-100 p-1.5 rounded-lg mr-2">
+                <Clock className="h-5 w-5 text-amber-600" />
+              </div>
               最近活动
             </h2>
             {stats?.recentActivity && stats.recentActivity.length > 0 ? (
-              <div className="space-y-2 max-h-[580px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
-                {stats.recentActivity.slice(0, 8).map((activity, index) => (
-                  <div key={index} className="flex items-center gap-3 p-2.5 hover:bg-indigo-50/60 rounded-lg transition-colors">
+              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
+                {stats.recentActivity.map((activity, index) => (
+                  <div key={index} className="flex items-center gap-3 p-2.5 hover:bg-white/60 rounded-lg transition-colors">
                     <div className="flex-shrink-0">
                       {getActivityIcon(activity.type)}
                     </div>
@@ -345,7 +358,7 @@ export default function AdminDashboard() {
                 <p className="text-sm text-slate-500">暂无最近活动</p>
               </div>
             )}
-          </Card>
+          </div>
         </div>
       </div>
     </div>

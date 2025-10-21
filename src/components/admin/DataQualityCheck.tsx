@@ -54,35 +54,40 @@ export function DataQualityCheck({ dataQuality }: DataQualityCheckProps) {
   const totalIssues = Object.values(dataQuality).reduce((sum, count) => sum + count, 0);
 
   return (
-    <Card className="p-6 border border-slate-200 shadow-sm">
+    <div className="backdrop-blur-sm bg-white/60 rounded-2xl p-4 border border-white/70 shadow-lg">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-slate-800 flex items-center">
           <AlertCircle className="h-5 w-5 mr-2 text-amber-500" />
           数据质量检查
         </h3>
         {totalIssues > 0 ? (
-          <span className="text-sm text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
+          <span className="text-sm text-amber-700 bg-amber-100/80 backdrop-blur-sm px-3 py-1 rounded-full font-medium border border-amber-200">
             发现 {totalIssues} 个问题
           </span>
         ) : (
-          <span className="text-sm text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+          <span className="text-sm text-emerald-700 bg-emerald-100/80 backdrop-blur-sm px-3 py-1 rounded-full font-medium border border-emerald-200">
             ✓ 数据完整
           </span>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {issues.map((issue) => (
           <div
             key={issue.title}
-            className={`${issue.bgColor} rounded-lg p-4 border ${
-              issue.count > 0 ? 'border-slate-200' : 'border-transparent'
-            } transition-all hover:shadow-sm`}
+            className={`relative overflow-hidden ${issue.bgColor}/60 backdrop-blur-sm rounded-xl p-4 border ${
+              issue.count > 0 ? 'border-slate-200/60' : 'border-white/60'
+            } transition-all hover:shadow-md hover:-translate-y-1 duration-300`}
           >
-            <div className="flex items-center justify-between mb-2">
-              <issue.icon className={`h-5 w-5 ${issue.color}`} />
+            {/* 装饰元素 */}
+            <div className="absolute top-0 right-0 w-16 h-16 bg-white/20 rounded-full -mr-8 -mt-8"></div>
+
+            <div className="relative flex items-center justify-between mb-2.5">
+              <div className={`${issue.bgColor} p-2 rounded-lg`}>
+                <issue.icon className={`h-5 w-5 ${issue.color}`} />
+              </div>
               <span
-                className={`text-2xl font-bold ${
+                className={`text-3xl font-bold ${
                   issue.count > 0 ? issue.color : 'text-slate-300'
                 }`}
               >
@@ -90,10 +95,10 @@ export function DataQualityCheck({ dataQuality }: DataQualityCheckProps) {
               </span>
             </div>
             <h4 className="text-sm font-semibold text-slate-800 mb-1">{issue.title}</h4>
-            <p className="text-xs text-slate-500">{issue.description}</p>
+            <p className="text-xs text-slate-600">{issue.description}</p>
           </div>
         ))}
       </div>
-    </Card>
+    </div>
   );
 }

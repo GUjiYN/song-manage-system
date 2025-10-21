@@ -34,18 +34,20 @@ interface TopRankingsProps {
 
 export function TopRankings({ topSongs, topArtists, topUsers }: TopRankingsProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* 最受欢迎歌曲 - 全宽 */}
-      <Card className="p-6 border border-slate-200 shadow-sm">
-        <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-          <Music className="h-5 w-5 mr-2 text-indigo-500" />
+      <div className="backdrop-blur-sm bg-gradient-to-br from-indigo-50/70 to-purple-50/40 rounded-2xl p-4 border border-indigo-200/40 shadow-lg">
+        <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+          <div className="bg-indigo-100 p-1.5 rounded-lg mr-2">
+            <Music className="h-5 w-5 text-indigo-600" />
+          </div>
           最受欢迎歌曲 Top 5
         </h3>
         <div className="space-y-2">
           {topSongs.slice(0, 5).map((song, index) => (
             <div
               key={song.id}
-              className="flex items-center gap-3 p-2.5 hover:bg-indigo-50/40 rounded-lg transition-colors group"
+              className="flex items-center gap-3 p-2 hover:bg-indigo-50/40 rounded-lg transition-colors group"
             >
               <div className="flex-shrink-0 w-7 h-7 flex items-center justify-center">
                 <span className={`text-base font-bold ${
@@ -80,21 +82,23 @@ export function TopRankings({ topSongs, topArtists, topUsers }: TopRankingsProps
             </div>
           ))}
         </div>
-      </Card>
+      </div>
 
       {/* 热门歌手和活跃用户 - 2列布局 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* 热门歌手 */}
-        <Card className="p-6 border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-            <User className="h-5 w-5 mr-2 text-teal-500" />
+        <div className="backdrop-blur-sm bg-gradient-to-br from-teal-50/70 to-emerald-50/40 rounded-2xl p-4 border border-teal-200/40 shadow-lg">
+          <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+            <div className="bg-teal-100 p-1.5 rounded-lg mr-2">
+              <User className="h-5 w-5 text-teal-600" />
+            </div>
             热门歌手 Top 5
           </h3>
           <div className="space-y-2">
             {topArtists.map((artist, index) => (
               <div
                 key={artist.id}
-                className="flex items-center gap-3 p-2.5 hover:bg-teal-50/40 rounded-lg transition-colors group"
+                className="flex items-center gap-3 p-2 hover:bg-teal-50/40 rounded-lg transition-colors group"
               >
                 <div className="flex-shrink-0 w-6 text-center">
                   <span className="text-sm font-bold text-slate-400">{index + 1}</span>
@@ -119,19 +123,21 @@ export function TopRankings({ topSongs, topArtists, topUsers }: TopRankingsProps
               </div>
             ))}
           </div>
-        </Card>
+        </div>
 
         {/* 最活跃用户 */}
-        <Card className="p-6 border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-            <List className="h-5 w-5 mr-2 text-rose-500" />
+        <div className="backdrop-blur-sm bg-gradient-to-br from-rose-50/70 to-pink-50/40 rounded-2xl p-4 border border-rose-200/40 shadow-lg">
+          <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+            <div className="bg-rose-100 p-1.5 rounded-lg mr-2">
+              <List className="h-5 w-5 text-rose-600" />
+            </div>
             最活跃用户 Top 5
           </h3>
           <div className="space-y-2">
             {topUsers.map((user, index) => (
               <div
                 key={user.id}
-                className="flex items-center gap-3 p-2.5 hover:bg-rose-50/40 rounded-lg transition-colors group"
+                className="flex items-center gap-3 p-2 hover:bg-rose-50/40 rounded-lg transition-colors group"
               >
                 <div className="flex-shrink-0 w-6 text-center">
                   <span className="text-sm font-bold text-slate-400">{index + 1}</span>
@@ -156,7 +162,7 @@ export function TopRankings({ topSongs, topArtists, topUsers }: TopRankingsProps
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );

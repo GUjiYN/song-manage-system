@@ -28,14 +28,16 @@ const COLORS = ['#6366f1', '#14b8a6', '#0ea5e9', '#f59e0b', '#ec4899', '#8b5cf6'
 
 export function TrendCharts({ trendData }: TrendChartsProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* 30天趋势图 */}
-      <Card className="p-6 border border-slate-200 shadow-sm">
-        <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-          <TrendingUp className="h-5 w-5 mr-2 text-emerald-500" />
+      <div className="backdrop-blur-sm bg-gradient-to-br from-white/70 to-blue-50/40 rounded-2xl p-4 border border-white/70 shadow-lg">
+        <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+          <div className="bg-emerald-100 p-1.5 rounded-lg mr-2">
+            <TrendingUp className="h-5 w-5 text-emerald-600" />
+          </div>
           30天数据趋势
         </h3>
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={trendData.dailyStats}>
             <defs>
               <linearGradient id="colorSongs" x1="0" y1="0" x2="0" y2="1">
@@ -90,16 +92,18 @@ export function TrendCharts({ trendData }: TrendChartsProps) {
             />
           </AreaChart>
         </ResponsiveContainer>
-      </Card>
+      </div>
 
       {/* 分类分布饼图 */}
-      <Card className="p-6 border border-slate-200 shadow-sm">
-        <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
-          <PieChartIcon className="h-5 w-5 mr-2 text-sky-500" />
+      <div className="backdrop-blur-sm bg-gradient-to-br from-white/70 to-purple-50/40 rounded-2xl p-4 border border-white/70 shadow-lg">
+        <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center">
+          <div className="bg-sky-100 p-1.5 rounded-lg mr-2">
+            <PieChartIcon className="h-5 w-5 text-sky-600" />
+          </div>
           歌曲分类分布
         </h3>
         {trendData.categoryDistribution.length > 0 ? (
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie
                 data={trendData.categoryDistribution}
@@ -126,11 +130,11 @@ export function TrendCharts({ trendData }: TrendChartsProps) {
             </PieChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-[250px] text-slate-400">
+          <div className="flex items-center justify-center h-[220px] text-slate-400">
             <p>暂无分类数据</p>
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 }
