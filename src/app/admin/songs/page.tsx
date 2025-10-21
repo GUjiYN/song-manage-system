@@ -38,8 +38,7 @@ import {
   Edit,
   Trash2,
   MoreHorizontal,
-  Clock,
-  Play
+  Clock
 } from 'lucide-react';
 import { getSongs, createSong, updateSong, deleteSong } from '@/services/admin/song';
 import { Song, SongFormData, SongQueryParams } from '@/types/song';
@@ -67,6 +66,46 @@ export default function AdminSongsPage() {
     albumId: 0,
     artistId: 0,
   });
+
+  // 时长输入归一化处理 - 全角转半角+自动补零
+  const normalizeDuration = (value: string): string => {
+    if (!value) return '';
+
+    // 1. 去除空格和全角冒号转半角
+    const cleaned = value.replace(/\s+/g, '').replace(/[::]/g, ':');
+
+    // 2. 匹配分钟:秒数格式 (支持部分输入)
+    const match = cleaned.match(/^(\d{1,2})(?::(\d{0,2}))?$/);
+    if (!match) {
+      return cleaned; // 返回原值,让HTML5校验处理
+    }
+
+    const [, minutes, seconds = ''] = match;
+
+    // 3. 只在输入完整(有冒号且秒数为2位)时补零
+    if (cleaned.includes(':') && seconds.length === 2) {
+      const paddedMinutes = minutes.padStart(2, '0');
+      const paddedSeconds = seconds.padStart(2, '0');
+
+      // 验证秒数范围 0-59
+      const secondNum = parseInt(seconds, 10);
+      if (secondNum > 59) {
+        return cleaned; // 秒数超范围,返回原值让HTML5校验提示
+      }
+
+      return `${paddedMinutes}:${paddedSeconds}`;
+    }
+
+    // 部分输入时保持原样,方便继续输入
+    return cleaned;
+  };
+
+  // 处理时长输入
+  const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    const normalized = normalizeDuration(raw);
+    setFormData({ ...formData, duration: normalized });
+  };
 
   const limit = 10;
 
@@ -289,13 +328,12 @@ export default function AdminSongsPage() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>添加新歌曲</DialogTitle>
-              <DialogDescription>
-                填写歌曲信息以添加到系统
-              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateSong} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">歌曲名称 *</Label>
+                <Label htmlFor="title">
+                  歌曲名称<span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="title"
                   value={formData.title}
@@ -305,18 +343,24 @@ export default function AdminSongsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="duration">时长（MM:SS） *</Label>
+                <Label htmlFor="duration">
+                  时长（MM:SS）<span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="duration"
                   value={formData.duration ?? ''}
-                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                  onChange={handleDurationChange}
                   placeholder="例如 03:45"
-                  pattern="^\\d{1,2}:[0-5]\\d$"
+                  pattern="^[0-9]{2}:[0-5][0-9]$"
+                  title="请输入有效的时长格式,例如:03:45(使用半角冒号,秒数00-59)"
                   required
                 />
+                <p className="text-xs text-slate-500">格式:分钟:秒数,例如 03:45</p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="artistId">歌手ID *</Label>
+                <Label htmlFor="artistId">
+                  歌手ID<span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="artistId"
                   type="number"
@@ -327,11 +371,13 @@ export default function AdminSongsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="albumId">专辑ID *</Label>
+                <Label htmlFor="albumId">
+                  专辑ID<span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="albumId"
                   type="number"
-                  value={formData.albumId}
+                  value={formData.albumId ?? ''}
                   onChange={(e) => setFormData({ ...formData, albumId: parseInt(e.target.value) || 0 })}
                   placeholder="输入专辑ID"
                   required
@@ -354,7 +400,7 @@ export default function AdminSongsPage() {
                 >
                   取消
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting} className="bg-sky-500 text-white hover:bg-sky-600">
                   {isSubmitting ? '创建中...' : '创建'}
                 </Button>
               </div>
@@ -384,7 +430,8 @@ export default function AdminSongsPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/80 backdrop-blur">
-              <TableHead className="w-[320px] pl-6 py-3">歌曲</TableHead>
+              <TableHead className="w-[96px] pl-6 py-3">ID</TableHead>
+              <TableHead className="w-[320px] py-3">歌曲</TableHead>
               <TableHead className="py-3">歌手</TableHead>
               <TableHead className="py-3">专辑</TableHead>
               <TableHead className="py-3">时长</TableHead>
@@ -397,9 +444,10 @@ export default function AdminSongsPage() {
               songs.map((song) => (
                 <TableRow
                   key={song.id}
-                  className="group transition-colors hover:bg-slate-50/70 focus-within:bg-slate-50/70"
+                  className="group border border-transparent transition-all hover:border-sky-100 hover:bg-slate-50 hover:shadow-sm focus-within:border-sky-100 focus-within:bg-slate-50"
                 >
-                  <TableCell className="font-medium pl-6">
+                  <TableCell className="pl-6 font-mono tracking-wide text-slate-600">#{song.id}</TableCell>
+                  <TableCell className="font-medium">
                     <div className="flex items-center gap-4">
                       {song.coverUrl ? (
                         <img
@@ -412,42 +460,9 @@ export default function AdminSongsPage() {
                           <Music className="w-5 h-5" />
                         </div>
                       )}
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-slate-900 group-hover:text-slate-800">
-                            {song.title}
-                          </span>
-                          <Badge
-                            variant="secondary"
-                            className="hidden sm:inline-flex bg-slate-100 text-slate-600 border-slate-200"
-                          >
-                            #{song.id}
-                          </Badge>
-                        </div>
-                        <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
-                          <Badge
-                            variant="outline"
-                            className="border-slate-200 bg-slate-50 text-slate-600"
-                          >
-                            {song.artist?.name || `歌手ID ${song.artistId}`}
-                          </Badge>
-                          {song.album?.name && (
-                            <Badge
-                              variant="outline"
-                              className="border-slate-200 bg-slate-50 text-slate-600"
-                            >
-                              {song.album.name}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="ml-auto h-8 w-8 shrink-0 rounded-full text-slate-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:text-slate-900 pointer-events-none group-hover:pointer-events-auto"
-                      >
-                        <Play className="h-4 w-4" />
-                      </Button>
+                      <span className="font-semibold text-slate-900 group-hover:text-slate-800">
+                        {song.title}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell className="text-slate-600">
@@ -514,8 +529,8 @@ export default function AdminSongsPage() {
       </Card>
 
       {/* 分页控件 */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center space-x-2">
+      {totalPages >= 1 && (
+        <div className="flex items-center justify-center gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -524,12 +539,74 @@ export default function AdminSongsPage() {
           >
             上一页
           </Button>
-          <span className="text-sm text-slate-500">
-            第 {currentPage} 页，共 {totalPages} 页
-          </span>
+
+          {/* 页码按钮 */}
+          <div className="flex items-center gap-1">
+            {/* 第一页 */}
+            {currentPage > 3 && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-9 h-9 border-slate-200 text-slate-700 "
+                  onClick={() => loadSongs(1, searchQuery)}
+                  disabled={isLoading}
+                >
+                  1
+                </Button>
+                {currentPage > 4 && (
+                  <span className="text-slate-400 px-1">...</span>
+                )}
+              </>
+            )}
+
+            {/* 当前页附近的页码 */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(page => {
+                if (totalPages <= 7) return true;
+                if (page === 1 || page === totalPages) return false;
+                return Math.abs(page - currentPage) <= 1;
+              })
+              .map(page => (
+                <Button
+                  key={page}
+                  variant={page === currentPage ? "default" : "outline"}
+                  size="sm"
+                  className={
+                    page === currentPage
+                      ? "w-9 h-9  text-white "
+                      : "w-9 h-9 border-slate-200 text-slate-700 hover:bg-sky-50 "
+                  }
+                  onClick={() => loadSongs(page, searchQuery)}
+                  disabled={isLoading}
+                >
+                  {page}
+                </Button>
+              ))}
+
+            {/* 最后一页 */}
+            {currentPage < totalPages - 2 && (
+              <>
+                {currentPage < totalPages - 3 && (
+                  <span className="text-slate-400 px-1">...</span>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-9 h-9 border-slate-200 text-slate-700 "
+                  onClick={() => loadSongs(totalPages, searchQuery)}
+                  disabled={isLoading}
+                >
+                  {totalPages}
+                </Button>
+              </>
+            )}
+          </div>
+
           <Button
             variant="outline"
             size="sm"
+            className="border-slate-200 text-slate-700 shadow-sm hover:bg-sky-50 focus-visible:ring-sky-200"
             onClick={() => loadSongs(currentPage + 1, searchQuery)}
             disabled={currentPage >= totalPages || isLoading}
           >
@@ -563,11 +640,13 @@ export default function AdminSongsPage() {
               <Input
                 id="edit-duration"
                 value={formData.duration ?? ''}
-                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                onChange={handleDurationChange}
                 placeholder="例如 03:45"
-                pattern="^\\d{1,2}:[0-5]\\d$"
+                pattern="^[0-9]{2}:[0-5][0-9]$"
+                title="请输入有效的时长格式,例如:03:45(使用半角冒号,秒数00-59)"
                 required
               />
+              <p className="text-xs text-slate-500">格式:分钟:秒数,例如 03:45</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-artistId">歌手ID *</Label>
@@ -585,7 +664,7 @@ export default function AdminSongsPage() {
               <Input
                 id="edit-albumId"
                 type="number"
-                value={formData.albumId}
+                value={formData.albumId ?? ''}
                 onChange={(e) => setFormData({ ...formData, albumId: parseInt(e.target.value) || 0 })}
                 placeholder="输入专辑ID"
                 required

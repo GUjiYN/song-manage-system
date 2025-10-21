@@ -7,6 +7,10 @@ function isPublicGet(pathname: string, method: string) {
     return false;
   }
 
+  if (pathname === '/api/discover') {
+    return true;
+  }
+
   if (pathname === '/api/playlists') {
     return true;
   }
