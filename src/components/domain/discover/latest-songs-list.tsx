@@ -6,11 +6,12 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Heart, MoreHorizontal, Plus } from 'lucide-react';
+import { Heart, Plus } from 'lucide-react';
 import type { Song } from '@/types/playlist';
 import { Button } from '@/components/ui/button';
 import { PlaylistSelectDialog } from '@/components/domain/playlist/playlist-select-dialog';
 import { useAuth } from '@/contexts/auth-context';
+import { useFavorites } from '@/hooks/use-favorites';
 
 interface LatestSongsListProps {
   songs: Song[];
@@ -25,12 +26,17 @@ const defaultCover =
 
 export function LatestSongsList({
   songs,
-  isLoading = false,
+  isLoading: propsIsLoading = false,
   className = '',
   onAddToPlaylist,
   onLike,
 }: LatestSongsListProps) {
   const { user } = useAuth();
+  const { toggleFavorite, isLiked, isLoading: favoritesLoading } = useFavorites({
+    onSuccess: (songId, isLiked) => {
+      onLike?.(songs.find(s => s.id === songId)!);
+    },
+  });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
 
@@ -46,9 +52,17 @@ export function LatestSongsList({
     setDialogOpen(true);
   };
 
+  // 处理喜欢点击
+  const handleLike = async (song: Song) => {
+    await toggleFavorite(song);
+  };
+
+  // 合并加载状态
+  const isLoading = propsIsLoading || favoritesLoading;
+
   if (isLoading) {
     return (
-      <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${className}`}>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 ${className}`}>
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="h-[84px] bg-slate-100 rounded-xl animate-pulse" />
         ))}
@@ -62,7 +76,7 @@ export function LatestSongsList({
 
   return (
     <>
-      <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${className}`}>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 ${className}`}>
         {songs.map((song) => (
           <div
             key={song.id}
@@ -98,18 +112,14 @@ export function LatestSongsList({
 
             {/* 右侧：操作 */}
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onLike?.(song)}
-                className="text-slate-600 hover:text-pink-600"
+              <button
+                onClick={() => handleLike(song)}
+                className={`p-2 rounded hover:bg-transparent ${isLiked(song.id) ? "text-pink-600 hover:text-pink-700" : "text-slate-600 hover:text-pink-600"}`}
                 aria-label="喜欢"
+                disabled={favoritesLoading}
               >
-                <Heart className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-slate-600" aria-label="更多">
-                <MoreHorizontal className="w-4 h-4" />
-              </Button>
+                <Heart className={`w-4 h-4 ${isLiked(song.id) ? 'fill-current' : ''}`} />
+              </button>
 
               {/* 悬浮显式：添加到歌单 */}
               <Button

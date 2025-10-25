@@ -18,13 +18,17 @@ export async function GET(request: NextRequest) {
     const playlistWhere = categoryId
       ? {
           isPublic: true,
+          type: { not: 'FAVORITES' }, // 过滤掉喜欢类型的歌单
           playlistSongs: {
             some: {
               song: { categories: { some: { id: categoryId } } },
             },
           },
         }
-      : { isPublic: true };
+      : {
+          isPublic: true,
+          type: { not: 'FAVORITES' }, // 过滤掉喜欢类型的歌单
+        };
 
     const [songs, playlists, categories] = await Promise.all([
       prisma.song.findMany({

@@ -97,14 +97,15 @@ model Song {
 
 // 歌单表
 model Playlist {
-  id          Int      @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   name        String
-  description String?  @db.Text
+  description String?      @db.Text
   cover       String?
-  isPublic    Boolean  @default(true)
+  isPublic    Boolean      @default(true)
+  type        PlaylistType @default(NORMAL)
   userId      Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   // 关联
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -133,4 +134,9 @@ enum UserRole {
   ADMIN
   MANAGER
   USER
+}
+
+enum PlaylistType {
+  NORMAL
+  FAVORITES
 }

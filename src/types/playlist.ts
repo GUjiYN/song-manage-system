@@ -39,6 +39,9 @@ export interface Album {
   updatedAt: string;
 }
 
+// 歌单类型枚举
+export type PlaylistType = 'NORMAL' | 'FAVORITES';
+
 // 歌单信息类型
 export interface Playlist {
   id: number;
@@ -46,6 +49,7 @@ export interface Playlist {
   description: string | null;
   coverUrl: string | null;
   isPublic: boolean;
+  type: PlaylistType;
   createdAt: string;
   updatedAt: string;
   creatorId: number;
