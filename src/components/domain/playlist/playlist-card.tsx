@@ -58,41 +58,6 @@ export function PlaylistCard({
     >
       {/* 封面容器 - 正方形 */}
       <div className="relative aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200">
-        {/* 管理按钮 */}
-        {showActions && (
-          <div className="absolute top-2 right-2 z-10">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="h-8 w-8 bg-white/90 hover:bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  data-inline-ignore
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleEditClick}>
-                  <Edit className="h-4 w-4 mr-2" />
-                  编辑
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleDeleteClick}
-                  className="text-red-600 focus:text-red-600"
-                  disabled={isDeleting === playlist.id}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  {isDeleting === playlist.id ? '删除中..' : '删除'}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        )}
 
         {/* 封面图 */}
         {playlist.coverUrl ? (

@@ -28,6 +28,18 @@ export function PlaylistHeader({
 }: PlaylistHeaderProps) {
   const { user } = useAuth();
 
+  // 调试信息（开发环境）
+  if (process.env.NODE_ENV === 'development') {
+    console.log('PlaylistHeader Debug:', {
+      playlistId: playlist.id,
+      isOwner,
+      hasOnEdit: !!onEdit,
+      userId: user?.id,
+      creatorId: playlist.creatorId,
+      creatorName: playlist.creator?.username
+    });
+  }
+
   // 默认封面
   const defaultCover = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-family='system-ui' font-size='24' fill='%239ca3af'%3E🎵%3C/text%3E%3C/svg%3E";
 
@@ -57,9 +69,29 @@ export function PlaylistHeader({
           {/* 歌单信息 */}
           <div className="flex-1 min-w-0">
             {/* 歌单名称 */}
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              {playlist.name}
-            </h1>
+            <div className="flex items-center gap-3 mb-4">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+                {playlist.name}
+              </h1>
+              {isOwner && onEdit && (
+                <Button
+                  onClick={onEdit}
+                  variant="ghost"
+                  size="sm"
+                  className="p-2 hover:bg-gray-100 border border-gray-300 rounded-lg"
+                  title="编辑歌单"
+                >
+                  <Edit className="w-5 h-5 text-gray-600" />
+                </Button>
+              )}
+
+              {/* 临时调试信息 */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="text-xs text-red-500 bg-red-50 px-2 py-1 rounded">
+                  DEBUG: isOwner={isOwner ? 'true' : 'false'}, hasEdit={!!onEdit ? 'true' : 'false'}
+                </div>
+              )}
+            </div>
 
             {/* 描述 */}
             {playlist.description && (
@@ -69,7 +101,7 @@ export function PlaylistHeader({
             )}
 
             {/* 创建者信息 */}
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-4">
               <Link href={`/users/${playlist.creator.username}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                 {playlist.creator.avatar ? (
                   <Image
@@ -90,6 +122,20 @@ export function PlaylistHeader({
               </Link>
               <span className="text-gray-500">创建</span>
             </div>
+
+            {/* 标签 */}
+            {playlist.tags && playlist.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {playlist.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* 统计信息 */}
             <div className="flex items-center gap-6 text-sm text-gray-500 mb-8">
@@ -114,16 +160,10 @@ export function PlaylistHeader({
             {/* 操作按钮 */}
             <div className="flex flex-wrap gap-3">
               {isOwner ? (
-                <>
-                  <Button onClick={onEdit} variant="outline">
-                    <Edit className="w-4 h-4 mr-2" />
-                    编辑歌单
-                  </Button>
-                  <Button onClick={onDelete} variant="destructive">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    删除歌单
-                  </Button>
-                </>
+                <Button onClick={onDelete} variant="destructive">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  删除歌单
+                </Button>
               ) : user ? (
                 <Button
                   onClick={onFollow}

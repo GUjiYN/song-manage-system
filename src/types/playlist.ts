@@ -50,6 +50,7 @@ export interface Playlist {
   updatedAt: string;
   creatorId: number;
   creator: User;
+  tags?: string[]; // 歌单标签
   _count?: {
     songs: number; // 歌曲数量
     followers: number; // 收藏者数量
@@ -64,6 +65,7 @@ export interface PlaylistFormData {
   description?: string;
   coverUrl?: string;
   isPublic: boolean;
+  tags?: string[];
 }
 
 // 歌单查询参数

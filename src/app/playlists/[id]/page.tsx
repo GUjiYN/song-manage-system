@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { PlaylistHeader } from '@/components/domain/playlist/playlist-header';
 import { SongList } from '@/components/domain/playlist/song-list';
+import { PlaylistEditDialog } from '@/components/domain/playlist/playlist-edit-dialog';
 import { getPlaylistById } from '@/services/client/playlist';
 import { deletePlaylist } from '@/services/client/playlist';
 import { Playlist, Song } from '@/types/playlist';
@@ -25,6 +26,7 @@ export default function PlaylistDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   const playlistId = Number(params.id);
 
@@ -59,7 +61,14 @@ export default function PlaylistDetailPage() {
 
   // 编辑歌单
   const handleEdit = () => {
-    router.push(`/playlists/${playlistId}/edit`);
+    setShowEditDialog(true);
+  };
+
+  // 编辑成功回调
+  const handleEditSuccess = (updatedPlaylist: Playlist) => {
+    setPlaylist(updatedPlaylist);
+    setShowEditDialog(false);
+    toast.success('歌单信息更新成功');
   };
 
   // 删除歌单
@@ -202,6 +211,16 @@ export default function PlaylistDetailPage() {
           onRemoveSong={handleRemoveSong}
         />
       </div>
+
+      {/* 编辑歌单弹窗 */}
+      {showEditDialog && playlist && (
+        <PlaylistEditDialog
+          playlist={playlist}
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          onSuccess={handleEditSuccess}
+        />
+      )}
     </div>
   );
 }

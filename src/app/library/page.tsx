@@ -201,10 +201,6 @@ export default function LibraryPage() {
             <>
               <PlaylistGrid
                 playlists={playlists}
-                showActions={true}
-                onEdit={(id) => router.push(`/playlists/edit/${id}`)}
-                onDelete={handleDeletePlaylist}
-                isDeleting={isDeleting}
                 onSelect={(id) => window.dispatchEvent(new CustomEvent('open-playlist-inline', { detail: id }))}
               />
 
