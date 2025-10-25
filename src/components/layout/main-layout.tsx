@@ -8,14 +8,22 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Search, Music, ListMusic, Heart, Compass, Library, Home, ChevronRight, ChevronDown, Plus, ArrowLeft } from 'lucide-react';
+import { Search, Music, ListMusic, Heart, Compass, Library, Home, ChevronRight, ChevronDown, Plus, ArrowLeft, ChevronDown as ChevronDownIcon, User, LogOut, Settings } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 import { PlaylistDialog } from '@/components/domain/playlist/playlist-dialog';
 import { PlaylistDetailInline } from '@/components/domain/playlist/playlist-detail-inline';
 import { useAuth } from '@/contexts/auth-context';
 import { getMyPlaylists, getFollowedPlaylists } from '@/services/client/playlist';
 import type { Playlist } from '@/types/playlist';
+import { UserRole } from '@/types/auth';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -25,7 +33,7 @@ interface MainLayoutProps {
 export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   // 预留移动端侧边栏开关（当前未使用）
   const [myPlaylists, setMyPlaylists] = useState<Playlist[]>([]);
@@ -278,18 +286,51 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
                       <p className="text-xs text-slate-500">@{user?.username}</p>
                     </div>
 
-                    {/* 用户头像（可点击）*/}
-                    <button
-                      onClick={() => router.push('/library')}
-                      className="group relative"
-                    >
-                      <Avatar className="h-11 w-11 border-2 border-slate-200 group-hover:border-indigo-500 transition-colors">
-                        <AvatarImage src={user?.avatar ?? undefined} alt={user?.name || user?.username} />
-                        <AvatarFallback className="bg-indigo-100 text-indigo-700 font-semibold">
-                          {(user?.name || user?.username || 'U').charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </button>
+                    {/* 用户头像下拉菜单 */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="group relative flex items-center gap-1">
+                          <Avatar className="h-11 w-11 border-2 border-slate-200 group-hover:border-indigo-500 transition-colors">
+                            <AvatarImage src={user?.avatar ?? undefined} alt={user?.name || user?.username} />
+                            <AvatarFallback className="bg-indigo-100 text-indigo-700 font-semibold">
+                              {(user?.name || user?.username || 'U').charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <ChevronDownIcon className="w-4 h-4 text-slate-600 group-hover:text-indigo-600 transition-colors" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56">
+                        {/* 用户信息显示 */}
+                        <div className="px-2 py-2 border-b border-slate-100">
+                          <p className="text-sm font-medium text-slate-900">{user?.name || user?.username}</p>
+                          <p className="text-xs text-slate-500">@{user?.username}</p>
+                          <p className="text-xs text-slate-400 mt-1">
+                            {user?.role === UserRole.ADMIN || user?.role === UserRole.MANAGER ? '管理员' : '普通用户'}
+                          </p>
+                        </div>
+
+                        {/* 菜单项 */}
+                        <DropdownMenuItem onClick={() => router.push('/library')} className="cursor-pointer">
+                          <User className="w-4 h-4 mr-2" />
+                          个人中心
+                        </DropdownMenuItem>
+
+                        {/* 管理员专用菜单项 */}
+                        {(user?.role === UserRole.ADMIN || user?.role === UserRole.MANAGER) && (
+                          <DropdownMenuItem onClick={() => router.push('/admin')} className="cursor-pointer">
+                            <Settings className="w-4 h-4 mr-2" />
+                            后台管理
+                          </DropdownMenuItem>
+                        )}
+
+                        <DropdownMenuSeparator />
+
+                        <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600 focus:text-red-600">
+                          <LogOut className="w-4 h-4 mr-2" />
+                          退出登录
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               </div>
