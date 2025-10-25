@@ -102,10 +102,7 @@ export default function DiscoverPage() {
             {isLoading ? (
               <LatestSongsList songs={[]} isLoading={true} />
             ) : discover && discover.featuredSongs.length > 0 ? (
-              <LatestSongsList
-                songs={discover.featuredSongs}
-                onAddToPlaylist={() => toast.info('添加到歌单功能即将上线~')}
-              />
+              <LatestSongsList songs={discover.featuredSongs} />
             ) : (
               <div className="text-center text-slate-500 py-10">暂无推荐歌曲</div>
             )}

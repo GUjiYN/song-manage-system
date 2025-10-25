@@ -12,10 +12,11 @@ function parsePlaylistId(param: string) {
   return id;
 }
 
-export async function POST(request: NextRequest, context: { params: { id: string } }) {
+export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireUser();
-    const playlistId = parsePlaylistId(context.params.id);
+    const { id } = await context.params;
+    const playlistId = parsePlaylistId(id);
 
     const body = await request.json();
     const payload = playlistSongCreateSchema.parse(body);

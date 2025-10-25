@@ -203,3 +203,22 @@ export async function unfollowPlaylist(id: number): Promise<void> {
     throw new Error(error.message || '取消收藏失败');
   }
 }
+
+/**
+ * 添加歌曲到歌单
+ */
+export async function addSongToPlaylist(playlistId: number, songId: number): Promise<void> {
+  const response = await fetch(`${API_BASE}/${playlistId}/songs`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ songId }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || '添加歌曲到歌单失败');
+  }
+}
+
