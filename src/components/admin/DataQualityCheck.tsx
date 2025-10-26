@@ -54,7 +54,7 @@ export function DataQualityCheck({ dataQuality }: DataQualityCheckProps) {
   const totalIssues = Object.values(dataQuality).reduce((sum, count) => sum + count, 0);
 
   return (
-    <div className="backdrop-blur-sm bg-white/60 rounded-2xl p-4 border border-white/70 shadow-lg">
+    <div className="backdrop-blur-sm bg-white/60 rounded-2xl p-4 border border-white/70">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-slate-800 flex items-center">
           <AlertCircle className="h-5 w-5 mr-2 text-amber-500" />
@@ -77,7 +77,7 @@ export function DataQualityCheck({ dataQuality }: DataQualityCheckProps) {
             key={issue.title}
             className={`relative overflow-hidden ${issue.bgColor}/60 backdrop-blur-sm rounded-xl p-4 border ${
               issue.count > 0 ? 'border-slate-200/60' : 'border-white/60'
-            } transition-all hover:shadow-md hover:-translate-y-1 duration-300`}
+            } transition-all hover:-translate-y-1 duration-300`}
           >
             {/* 装饰元素 */}
             <div className="absolute top-0 right-0 w-16 h-16 bg-white/20 rounded-full -mr-8 -mt-8"></div>

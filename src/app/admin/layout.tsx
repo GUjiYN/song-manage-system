@@ -14,11 +14,21 @@ import {
   User,
   Disc,
   LogOut,
-  Menu,
-  Users
+  Users,
+  Home,
+  ChevronDown,
+  UserCircle,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/auth-context';
 import { getDefaultRedirectPath, isAdminRole } from '@/lib/auth-redirect';
 
@@ -36,6 +46,23 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
 
   // 使用一个标志来防止重复重定向
   const [isRedirecting, setIsRedirecting] = React.useState(false);
+
+  // 侧边栏收起/展开状态
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
+
+  // 滚动状态管理
+  const [isScrolled, setIsScrolled] = React.useState(false);
+
+  // 监听滚动事件
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const scrolled = window.scrollY > 10;
+      setIsScrolled(scrolled);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // 检查用户是否已登录，如果未登录则重定向到��录页
   React.useEffect(() => {
@@ -124,90 +151,74 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-slate-100 flex">
       {/* 侧边栏 */}
-      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:shadow-lg lg:bg-white lg:border-r lg:border-slate-200">
+      <div className={`hidden lg:flex lg:flex-col ${isSidebarCollapsed ? 'lg:w-14' : 'lg:w-48'} lg:fixed lg:inset-y-0 lg:border-r lg:border-slate-200 transition-all duration-300`}>
+        {/* 顶部标题 */}
         <div className="flex items-center justify-center h-16 px-6 bg-indigo-600">
-          <h1 className="text-xl font-semibold text-indigo-50 tracking-wide">管理后台</h1>
+          {!isSidebarCollapsed && (
+            <h1 className="text-xl font-semibold text-indigo-50 tracking-wide">管理后台</h1>
+          )}
+          {isSidebarCollapsed && (
+            <div className="text-indigo-50 text-2xl font-bold">A</div>
+          )}
         </div>
 
         <nav className="flex-1 mt-8">
-          <div className="px-4 space-y-2">
+          <div className={`px-4 space-y-2 ${isSidebarCollapsed ? 'px-2' : ''}`}>
             {navigation.map((item) => {
               const isActive = item.current;
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`group flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors ${
+                  className={`group flex items-center ${isSidebarCollapsed ? 'justify-center px-2' : 'px-4'} py-3 text-sm font-medium rounded-md transition-colors ${
                     isActive
-                      ? 'bg-indigo-100 text-indigo-700 shadow-sm'
+                      ? 'bg-indigo-100 text-indigo-700'
                       : 'text-slate-600 hover:bg-slate-200/70 hover:text-slate-800'
                   }`}
+                  title={isSidebarCollapsed ? item.name : undefined}
                 >
                   <item.icon
-                    className={`mr-3 h-5 w-5 flex-shrink-0 ${
+                    className={`h-5 w-5 flex-shrink-0 ${
                       isActive ? 'text-indigo-500' : 'text-slate-400 group-hover:text-slate-500'
                     }`}
                   />
-                  {item.name}
+                  {!isSidebarCollapsed && <span className="ml-3">{item.name}</span>}
                 </Link>
               );
             })}
           </div>
         </nav>
 
-        {/* 用户信息 */}
-        <div className="p-4 border-t border-slate-200 bg-slate-50">
-          <div className="flex items-center">
-            <Avatar className="h-8 w-8 flex-shrink-0">
-              <AvatarImage src={user.avatar ?? undefined} alt={user.name || user.username} />
-              <AvatarFallback>
-                {(user.name || user.username || 'U').charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="ml-3 flex-1 min-w-0">
-              <p className="text-sm font-semibold text-slate-800 truncate">
-                {user.name || user.username}
-              </p>
-              <p className="text-xs text-slate-500 truncate">
-                {user.email}
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="ml-2 flex-shrink-0 text-slate-500 hover:text-indigo-600"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
+        {/* 收起/展开按钮 */}
+        <div className="p-4 border-t border-slate-200">
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="flex items-center justify-center w-full p-2 rounded-lg hover:bg-slate-100 transition-colors group"
+            title={isSidebarCollapsed ? "展开侧边栏" : "收起侧边栏"}
+          >
+            {isSidebarCollapsed ? (
+              <ChevronRight className="h-5 w-5 text-slate-600 group-hover:text-slate-800 transition-colors" />
+            ) : (
+              <>
+                <ChevronLeft className="h-5 w-5 text-slate-600 group-hover:text-slate-800 transition-colors" />
+                <span className="ml-2 text-sm text-slate-600">收起侧边栏</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 
       {/* 主内容区域 */}
-      <div className="lg:pl-64 flex flex-col flex-1">
-        {/* 移动端顶部栏 */}
-        <div className="lg:hidden">
-          <div className="flex items-center justify-between h-16 px-4 bg-white border-b border-slate-200">
-            <div className="flex items-center">
-              <Button variant="ghost" size="sm">
-                <Menu className="h-5 w-5" />
-              </Button>
-              <h1 className="ml-3 text-lg font-semibold text-slate-800">管理后台</h1>
-            </div>
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={user.avatar ?? undefined} alt={user.name || user.username} />
-              <AvatarFallback>
-                {(user.name || user.username || 'U').charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
+      <div className={`${isSidebarCollapsed ? 'lg:pl-14' : 'lg:pl-48'} flex flex-col flex-1 transition-all duration-300`}>
 
         {/* 桌面端顶部导航栏 */}
-        <header className="hidden lg:block bg-white shadow-sm border-b border-slate-200">
+        <header className={`hidden lg:block sticky top-0 z-50 transition-all duration-300 ${
+          isScrolled
+            ? 'bg-white/40 backdrop-blur-md '
+            : 'bg-transparent'
+        }`}>
           <div className="px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
+            <div className="flex items-center justify-between h-12">
               {/* 面包屑 */}
               <nav className="flex">
                 <ol className="flex items-center space-x-2 text-sm text-slate-500">
@@ -222,14 +233,54 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
                   </li>
                 </ol>
               </nav>
+
+              {/* 用户头像下拉菜单 */}
+              <div className="flex items-center">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center p-2 rounded-lg hover:bg-slate-100 transition-colors group">
+                      <Avatar className="h-8 w-8 flex-shrink-0">
+                        <AvatarImage src={user.avatar ?? undefined} alt={user.name || user.username} />
+                        <AvatarFallback>
+                          {(user.name || user.username || 'U').charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <ChevronDown className="ml-2 h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44">
+                    <div className="px-2 py-1.5 text-sm text-slate-500 border-b border-slate-100">
+                      管理员账户
+                    </div>
+                    <DropdownMenuItem asChild>
+                      <Link href="/" className="flex items-center cursor-pointer">
+                        <Home className="h-4 w-4 mr-2 text-green-600" />
+                        <span>访问前台首页</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="flex items-center cursor-pointer">
+                      <UserCircle className="h-4 w-4 mr-2 text-slate-600" />
+                      <span>个人资料</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="flex items-center cursor-pointer text-red-600 focus:text-red-600"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      <span>退出登录</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
         </header>
 
         {/* 主内容 */}
         <main className="flex-1">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="pt-2 pb-6">
+            <div className="w-full px-2 sm:px-4">
               {children}
             </div>
           </div>

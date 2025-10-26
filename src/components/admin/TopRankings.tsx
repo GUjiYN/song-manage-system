@@ -36,7 +36,7 @@ export function TopRankings({ topSongs, topArtists, topUsers }: TopRankingsProps
   return (
     <div className="space-y-5">
       {/* 最受欢迎歌曲 - 全宽 */}
-      <div className="backdrop-blur-sm bg-gradient-to-br from-indigo-50/70 to-purple-50/40 rounded-2xl p-4 border border-indigo-200/40 shadow-lg">
+      <div className="backdrop-blur-sm bg-gradient-to-br from-indigo-50/70 to-purple-50/40 rounded-2xl p-4 border border-indigo-200/40">
         <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center">
           <div className="bg-indigo-100 p-1.5 rounded-lg mr-2">
             <Music className="h-5 w-5 text-indigo-600" />
@@ -87,7 +87,7 @@ export function TopRankings({ topSongs, topArtists, topUsers }: TopRankingsProps
       {/* 热门歌手和活跃用户 - 2列布局 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* 热门歌手 */}
-        <div className="backdrop-blur-sm bg-gradient-to-br from-teal-50/70 to-emerald-50/40 rounded-2xl p-4 border border-teal-200/40 shadow-lg">
+        <div className="backdrop-blur-sm bg-gradient-to-br from-teal-50/70 to-emerald-50/40 rounded-2xl p-4 border border-teal-200/40">
           <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center">
             <div className="bg-teal-100 p-1.5 rounded-lg mr-2">
               <User className="h-5 w-5 text-teal-600" />
@@ -126,7 +126,7 @@ export function TopRankings({ topSongs, topArtists, topUsers }: TopRankingsProps
         </div>
 
         {/* 最活跃用户 */}
-        <div className="backdrop-blur-sm bg-gradient-to-br from-rose-50/70 to-pink-50/40 rounded-2xl p-4 border border-rose-200/40 shadow-lg">
+        <div className="backdrop-blur-sm bg-gradient-to-br from-rose-50/70 to-pink-50/40 rounded-2xl p-4 border border-rose-200/40">
           <h3 className="text-lg font-semibold text-slate-800 mb-3 flex items-center">
             <div className="bg-rose-100 p-1.5 rounded-lg mr-2">
               <List className="h-5 w-5 text-rose-600" />

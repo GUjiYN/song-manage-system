@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/card';
 import { TopRankings } from '@/components/admin/TopRankings';
 import { TrendCharts } from '@/components/admin/TrendCharts';
 import { DataQualityCheck } from '@/components/admin/DataQualityCheck';
+import { useAuth } from '@/contexts/auth-context';
 
 // 统计数据类型
 interface SystemStats {
@@ -71,9 +72,41 @@ interface SystemStats {
 }
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [greeting, setGreeting] = useState<string>('中午好');
+
+  // 根据时间生成问候语
+  const generateGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 9) {
+      return '早上好';
+    } else if (hour >= 9 && hour < 12) {
+      return '上午好';
+    } else if (hour >= 12 && hour < 14) {
+      return '中午好';
+    } else if (hour >= 14 && hour < 18) {
+      return '下午好';
+    } else if (hour >= 18 && hour < 22) {
+      return '晚上好';
+    } else {
+      return '夜深了';
+    }
+  };
+
+  // 更新问候语
+  useEffect(() => {
+    setGreeting(generateGreeting());
+
+    // 每分钟更新一次问候语
+    const interval = setInterval(() => {
+      setGreeting(generateGreeting());
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // 加载统计数据
   useEffect(() => {
@@ -159,8 +192,12 @@ export default function AdminDashboard() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
-            <p className="text-slate-500">系统概览和统计信息</p>
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">👋</span>
+              <h1 className="text-2xl font-bold text-slate-800">
+                {greeting}，{user?.name || user?.username || '管理员'}
+              </h1>
+            </div>
           </div>
           <div className="h-8 w-32 bg-slate-200 rounded animate-pulse"></div>
         </div>
@@ -259,12 +296,16 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-5 rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-sm">
+    <div className="space-y-5 p-0">
       {/* 页面标题 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Dashboard</h1>
-          <p className="text-slate-500 mt-1">系统概览和统计信息</p>
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">👋</span>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              {greeting}，{user?.name || user?.username || '管理员'}
+            </h1>
+          </div>
         </div>
         <div className="flex items-center gap-2 text-sm bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full border border-emerald-200">
           <TrendingUp className="h-4 w-4" />
@@ -283,7 +324,7 @@ export default function AdminDashboard() {
               index === 2 ? 'from-sky-500 to-sky-600' :
               index === 3 ? 'from-amber-500 to-amber-600' :
               'from-rose-500 to-rose-600'
-            } shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
+            } transition-all duration-300 hover:-translate-y-1`}
           >
             {/* 装饰背景 */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
@@ -327,7 +368,7 @@ export default function AdminDashboard() {
 
         {/* 右侧: 最近活动 (1列) */}
         <div className="lg:col-span-1">
-          <div className="backdrop-blur-sm bg-gradient-to-br from-amber-50/60 to-orange-50/40 rounded-2xl p-4 border border-amber-200/40 shadow-lg h-full">
+          <div className="backdrop-blur-sm bg-gradient-to-br from-amber-50/60 to-orange-50/40 rounded-2xl p-4 border border-amber-200/40 h-full">
             <h2 className="text-lg font-semibold text-slate-800 mb-3 flex items-center">
               <div className="bg-amber-100 p-1.5 rounded-lg mr-2">
                 <Clock className="h-5 w-5 text-amber-600" />
