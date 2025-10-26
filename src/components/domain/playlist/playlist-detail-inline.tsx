@@ -141,7 +141,10 @@ export function PlaylistDetailInline({ id, onBack }: PlaylistDetailInlineProps) 
   if (!playlist) return null;
 
   const songs: Song[] | undefined = playlist.songs as unknown as Song[] | undefined;
-  const isOwner = user ? user.id === playlist.creatorId : false;
+
+  // 修复类型比较问题
+  const isOwner = user && playlist ?
+    Number(user.id) === Number(playlist.creatorId) : false;
 
   return (
     <div className="space-y-6">
@@ -173,33 +176,31 @@ export function PlaylistDetailInline({ id, onBack }: PlaylistDetailInlineProps) 
 
               {/* 操作按钮 */}
               <div className="flex flex-col gap-2">
-                {!isOwner && user && (
-                  <Button
-                    onClick={handleFollow}
-                    variant={isFollowing ? "outline" : "default"}
-                    size="sm"
-                    className={isFollowing ? "text-slate-600 hover:text-slate-900" : ""}
-                    title={isFollowing ? "取消收藏此歌单" : "收藏此歌单"}
-                  >
-                    {isFollowing ? (
-                      <>
-                        <BookmarkCheck className="w-4 h-4 mr-2" />
-                        取消收藏
-                      </>
-                    ) : (
-                      <>
-                        <Bookmark className="w-4 h-4 mr-2" />
-                        收藏歌单
-                      </>
-                    )}
-                  </Button>
-                )}
-                {!isOwner && !user && (
-                  <Button variant="outline" size="sm" disabled>
-                    <Bookmark className="w-4 h-4 mr-2" />
-                    收藏歌单
-                  </Button>
-                )}
+                {/* 始终显示按钮，根据状态控制是否禁用 */}
+                <Button
+                  onClick={handleFollow}
+                  variant={isFollowing ? "outline" : "default"}
+                  size="sm"
+                  disabled={!user || isOwner}
+                  className={isFollowing ? "text-slate-600 hover:text-slate-900" : ""}
+                  title={
+                    !user ? "请先登录" :
+                    isOwner ? "不能收藏自己的歌单" :
+                    isFollowing ? "取消收藏此歌单" : "收藏此歌单"
+                  }
+                >
+                  {isFollowing ? (
+                    <>
+                      <BookmarkCheck className="w-4 h-4 mr-2" />
+                      取消收藏
+                    </>
+                  ) : (
+                    <>
+                      <Bookmark className="w-4 h-4 mr-2" />
+                      {!user ? "请先登录" : isOwner ? "自己的歌单" : "收藏歌单"}
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
 
