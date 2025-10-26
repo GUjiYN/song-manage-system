@@ -44,6 +44,10 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
   const [followedOpen, setFollowedOpen] = useState(true);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<number | null>(null);
 
+  // 滚动状态
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [showScrollShadow, setShowScrollShadow] = useState(false);
+
   // 导航菜单
   const navItems = useMemo(
     () => [
@@ -95,6 +99,22 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
   useEffect(() => {
     reloadSidebarPlaylists();
   }, [reloadSidebarPlaylists]);
+
+  // 监听滚动事件，实现毛玻璃效果
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 20);
+      setShowScrollShadow(scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // 初始化状态
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   // 监听全局事件，允许子页面触发内嵌详情
   useEffect(() => {
@@ -252,8 +272,14 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
         <main className="flex-1 pl-56">
           <div className="min-h-screen">
             {/* 顶部导航 */}
-            <div className="sticky top-0 z-30">
-              <div className="px-4 sm:px-6 lg:px-8 py-4">
+            <div className={`sticky top-0 z-30 transition-all duration-300 ${
+              isScrolled
+                ? 'fixed top-0 left-56 right-0 bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm'
+                : 'bg-transparent'
+            } ${showScrollShadow ? 'shadow-md' : ''}`}>
+              <div className={`px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
+                isScrolled ? 'py-2' : 'py-3'
+              }`}>
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 flex-1 max-w-2xl">
                     {/* 返回按钮（全局） */}
@@ -337,7 +363,9 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
             </div>
 
             {/* 页面主体内容：若选择了侧边栏歌单，则在当前页渲染详情 */}
-            <div className="px-6 py-6">
+            <div className={`px-6 py-6 transition-all duration-300 ${
+              isScrolled ? 'mt-16' : 'mt-0'
+            }`}>
               {selectedPlaylistId ? (
                 <PlaylistDetailInline id={selectedPlaylistId} />
               ) : (

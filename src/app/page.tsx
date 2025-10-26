@@ -72,7 +72,7 @@ export default function Home() {
                         </Button>
                       </Link>
                       <Link href="/discover">
-                        <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                        <Button size="lg" variant="outline" className="border-white text-white bg-white/10 hover:bg-white/20">
                           发现更多
                           <ArrowRight className="w-5 h-5 ml-2" />
                         </Button>
@@ -97,7 +97,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-
           {/* 功能特性 */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-slate-900 mb-6">核心功能</h2>
