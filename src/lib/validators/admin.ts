@@ -6,7 +6,7 @@ export const idParamSchema = z.object({
 
 export const artistCreateSchema = z.object({
   name: z.string().min(1).max(100),
-  avatar: z.string().url().optional(),
+  avatar: z.string().optional(), // 移除URL验证，允许相对路径
   description: z.string().max(5000).optional(),
   country: z.string().max(100).optional(),
 });

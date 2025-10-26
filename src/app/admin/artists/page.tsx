@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { ImageUpload } from '@/components/ui/image-upload';
 import {
   User,
   Plus,
@@ -257,12 +258,13 @@ export default function AdminArtistsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="avatar">头像URL</Label>
-                <Input
-                  id="avatar"
+                <Label>头像图片</Label>
+                <ImageUpload
                   value={formData.avatar}
-                  onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
-                  placeholder="输入头像图片URL"
+                  onChange={(url) => setFormData({ ...formData, avatar: url })}
+                  placeholder="上传歌手头像"
+                  maxSize={5}
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="space-y-2">
@@ -457,12 +459,13 @@ export default function AdminArtistsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-avatar">头像URL</Label>
-              <Input
-                id="edit-avatar"
+              <Label>头像图片</Label>
+              <ImageUpload
                 value={formData.avatar}
-                onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
-                placeholder="输入头像图片URL"
+                onChange={(url) => setFormData({ ...formData, avatar: url })}
+                placeholder="上传歌手头像"
+                maxSize={5}
+                disabled={isSubmitting}
               />
             </div>
             <div className="space-y-2">
