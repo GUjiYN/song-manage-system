@@ -281,63 +281,74 @@ export default function TagsPage() {
       </div>
 
       {/* 搜索栏 */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-        <Input
-          placeholder="搜索标签..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
+      <form onSubmit={(e) => { e.preventDefault(); }}>
+        <div className="flex gap-4">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <Input
+              placeholder="搜索标签..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Button type="submit">搜索</Button>
+        </div>
+      </form>
 
       {/* 标签列表 */}
-      <div className="bg-white rounded-lg">
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>标签</TableHead>
-              <TableHead>描述</TableHead>
-              <TableHead>歌曲数量</TableHead>
-              <TableHead>创建时间</TableHead>
-              <TableHead className="text-right">操作</TableHead>
+            <TableRow className="bg-slate-50/80 backdrop-blur">
+              <TableHead className="pl-8 py-3">标签</TableHead>
+              <TableHead className="py-3">描述</TableHead>
+              <TableHead className="py-3">歌曲数量</TableHead>
+              <TableHead className="py-3">创建时间</TableHead>
+              <TableHead className="text-right pr-8 py-3">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredTags.map((tag) => (
-              <TableRow key={tag.id}>
-                <TableCell>
+              <TableRow
+                key={tag.id}
+                className="group border border-transparent transition-all hover:border-sky-100 hover:bg-slate-50 hover:shadow-sm focus-within:border-sky-100 focus-within:bg-slate-50"
+              >
+                <TableCell className="pl-8">
                   <div className="flex items-center gap-2">
                     <div
                       className="w-4 h-4 rounded-full"
                       style={{ backgroundColor: tag.color }}
                     />
-                    <span className="font-medium">{tag.name}</span>
+                    <span className="font-medium text-slate-900 group-hover:text-slate-800">{tag.name}</span>
                   </div>
                 </TableCell>
                 <TableCell>
                   <span className="text-slate-600">{tag.description || '-'}</span>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{tag.songCount} 首歌曲</Badge>
+                  <Badge variant="secondary" className="text-xs bg-slate-100 text-slate-700">
+                    {tag.songCount} 首歌曲
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   <span className="text-slate-600">{tag.createdAt}</span>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right pr-8">
                   <div className="flex items-center justify-end gap-2">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => openEditDialog(tag)}
+                      className="hover:bg-slate-100 transition-colors"
                     >
-                      <Edit2 className="h-4 w-4" />
+                      <Edit2 className="h-4 w-4 text-slate-600" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => openDeleteDialog(tag)}
-                      className="text-red-600 hover:text-red-700"
+                      className="text-slate-600 hover:bg-slate-100 hover:text-red-600 transition-colors"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

@@ -441,14 +441,14 @@ export default function AdminSongsPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/80 backdrop-blur">
-              <TableHead className="w-[96px] pl-6 py-3">ID</TableHead>
+              <TableHead className="w-[96px] pl-8 py-3">ID</TableHead>
               <TableHead className="w-[320px] py-3">歌曲</TableHead>
               <TableHead className="py-3">歌手</TableHead>
               <TableHead className="py-3">专辑</TableHead>
               <TableHead className="py-3">时长</TableHead>
               <TableHead className="py-3">标签</TableHead>
               <TableHead className="py-3">创建时间</TableHead>
-              <TableHead className="text-right pr-6 py-3">操作</TableHead>
+              <TableHead className="text-right pr-8 py-3">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -458,7 +458,7 @@ export default function AdminSongsPage() {
                   key={song.id}
                   className="group border border-transparent transition-all hover:border-sky-100 hover:bg-slate-50 hover:shadow-sm focus-within:border-sky-100 focus-within:bg-slate-50"
                 >
-                  <TableCell className="pl-6 font-mono tracking-wide text-slate-600">#{song.id}</TableCell>
+                  <TableCell className="pl-8 font-mono tracking-wide text-slate-600">#{song.id}</TableCell>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-4">
                       {song.coverUrl ? (
@@ -515,7 +515,7 @@ export default function AdminSongsPage() {
                   <TableCell className="text-slate-600">
                     {new Date(song.createdAt).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="text-right pr-6">
+                  <TableCell className="text-right pr-8">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
