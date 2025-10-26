@@ -55,6 +55,7 @@ export default function AdminAlbumsPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -165,15 +166,21 @@ export default function AdminAlbumsPage() {
     }
   };
 
+  // 打开删除确认对话框
+  const openDeleteDialog = (album: Album) => {
+    setEditingAlbum(album);
+    setIsDeleteDialogOpen(true);
+  };
+
   // 处理删除专辑
-  const handleDeleteAlbum = async (album: Album) => {
-    if (!window.confirm(`确定要删除专辑"${album.name}"吗？此操作不可恢复。`)) {
-      return;
-    }
+  const handleDeleteAlbum = async () => {
+    if (!editingAlbum) return;
 
     try {
-      await deleteAlbum(album.id);
-      toast.success(`专辑"${album.name}"已删除`);
+      await deleteAlbum(editingAlbum.id);
+      toast.success(`专辑"${editingAlbum.name}"已删除`);
+      setIsDeleteDialogOpen(false);
+      setEditingAlbum(null);
       await loadAlbums(currentPage, searchQuery);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '删除失败';
@@ -320,19 +327,19 @@ export default function AdminAlbumsPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/80 backdrop-blur">
-              <TableHead className="pl-6 py-3">专辑名称</TableHead>
+              <TableHead className="pl-8 py-3">专辑名称</TableHead>
               <TableHead className="py-3">歌手</TableHead>
               <TableHead className="py-3">歌曲数量</TableHead>
               <TableHead className="py-3">发行日期</TableHead>
               <TableHead className="py-3">创建时间</TableHead>
-              <TableHead className="text-right pr-6 py-3">操作</TableHead>
+              <TableHead className="text-right pr-8 py-3">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {albums.length > 0 ? (
               albums.map((album) => (
-                <TableRow key={album.id}>
-                  <TableCell className="font-medium pl-6">
+                <TableRow key={album.id} className="group border border-transparent transition-all hover:border-sky-100 hover:bg-slate-50 hover:shadow-sm focus-within:border-sky-100 focus-within:bg-slate-50">
+                  <TableCell className="font-medium pl-8">
                     <div className="flex items-center space-x-3">
                       {album.coverUrl ? (
                         <img
@@ -346,7 +353,7 @@ export default function AdminAlbumsPage() {
                         </div>
                       )}
                       <div>
-                        <div className="font-medium">{album.name}</div>
+                        <div className="font-medium text-slate-900 group-hover:text-slate-800">{album.name}</div>
                       </div>
                     </div>
                   </TableCell>
@@ -374,7 +381,7 @@ export default function AdminAlbumsPage() {
                   <TableCell>
                     {new Date(album.createdAt).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="text-right pr-6">
+                  <TableCell className="text-right pr-8">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -394,7 +401,7 @@ export default function AdminAlbumsPage() {
                           编辑
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDeleteAlbum(album)}
+                          onClick={() => openDeleteDialog(album)}
                           className="text-slate-600 hover:bg-slate-200/70 hover:text-slate-800 focus:bg-slate-200/70 focus:text-slate-800 cursor-pointer transition-colors"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
@@ -510,6 +517,33 @@ export default function AdminAlbumsPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* 删除确认对话框 */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>确认删除</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-600">
+              确定要删除专辑 "{editingAlbum?.name}" 吗？此操作不可撤销。
+              {editingAlbum && editingAlbum._count?.songs && editingAlbum._count.songs > 0 && (
+                <span className="text-amber-600 font-medium mt-2 block">
+                  注意：该专辑下有 {editingAlbum._count.songs} 首歌曲，删除专辑后这些歌曲将被单独保留。
+                </span>
+              )}
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                取消
+              </Button>
+              <Button onClick={() => handleDeleteAlbum()} className="bg-red-600 hover:bg-red-700">
+                删除
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

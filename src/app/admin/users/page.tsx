@@ -72,6 +72,7 @@ export default function AdminUsersPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -188,15 +189,21 @@ export default function AdminUsersPage() {
     }
   };
 
+  // 打开删除确认对话框
+  const openDeleteDialog = (user: AdminUser) => {
+    setEditingUser(user);
+    setIsDeleteDialogOpen(true);
+  };
+
   // 处理删除用户
-  const handleDeleteUser = async (user: AdminUser) => {
-    if (!window.confirm(`确定要删除用户"${user.username}"吗？此操作不可恢复。`)) {
-      return;
-    }
+  const handleDeleteUser = async () => {
+    if (!editingUser) return;
 
     try {
-      await deleteUser(user.id);
-      toast.success(`用户"${user.username}"已删除`);
+      await deleteUser(editingUser.id);
+      toast.success(`用户"${editingUser.username}"已删除`);
+      setIsDeleteDialogOpen(false);
+      setEditingUser(null);
       await loadUsers(currentPage, searchQuery);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '删除失败';
@@ -449,8 +456,8 @@ export default function AdminUsersPage() {
                           <Edit className="h-4 w-4 mr-2" />
                           编辑
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteUser(user)}
+                      <DropdownMenuItem
+                          onClick={() => openDeleteDialog(user)}
                           className="text-slate-600 hover:bg-slate-200/70 hover:text-slate-800 focus:bg-slate-200/70 focus:text-slate-800 cursor-pointer transition-colors"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
@@ -591,6 +598,28 @@ export default function AdminUsersPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* 删除确认对话框 */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>确认删除</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-600">
+              确定要删除用户 "{editingUser?.username}" 吗？此操作不可撤销。
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                取消
+              </Button>
+              <Button onClick={() => handleDeleteUser()} className="bg-red-600 hover:bg-red-700">
+                删除
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

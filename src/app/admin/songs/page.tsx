@@ -55,6 +55,7 @@ export default function AdminSongsPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingSong, setEditingSong] = useState<Song | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -214,15 +215,21 @@ export default function AdminSongsPage() {
     }
   };
 
+  // 打开删除确认对话框
+  const openDeleteDialog = (song: Song) => {
+    setEditingSong(song);
+    setIsDeleteDialogOpen(true);
+  };
+
   // 处理删除歌曲
-  const handleDeleteSong = async (song: Song) => {
-    if (!window.confirm(`确定要删除歌曲"${song.title}"吗？此操作不可恢复。`)) {
-      return;
-    }
+  const handleDeleteSong = async () => {
+    if (!editingSong) return;
 
     try {
-      await deleteSong(song.id);
-      toast.success(`歌曲"${song.title}"已删除`);
+      await deleteSong(editingSong.id);
+      toast.success(`歌曲"${editingSong.title}"已删除`);
+      setIsDeleteDialogOpen(false);
+      setEditingSong(null);
       await loadSongs(currentPage, searchQuery);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '删除失败';
@@ -535,7 +542,7 @@ export default function AdminSongsPage() {
                           编辑
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDeleteSong(song)}
+                          onClick={() => openDeleteDialog(song)}
                           className="text-slate-600 hover:bg-slate-200/70 hover:text-slate-800 focus:bg-slate-200/70 focus:text-slate-800 cursor-pointer transition-colors"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
@@ -734,6 +741,28 @@ export default function AdminSongsPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* 删除确认对话框 */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>确认删除</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-600">
+              确定要删除歌曲 "{editingSong?.title}" 吗？此操作不可撤销。
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                取消
+              </Button>
+              <Button onClick={() => handleDeleteSong()} className="bg-red-600 hover:bg-red-700">
+                删除
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
