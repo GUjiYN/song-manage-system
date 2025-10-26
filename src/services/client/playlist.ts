@@ -14,14 +14,37 @@ const API_BASE = '/api/playlists';
 
 // 通用API响应处理函数
 async function handleApiResponse<T>(response: Response): Promise<T> {
+  // 检查响应是否为JSON格式
+  const contentType = response.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    const text = await response.text();
+    console.error('非JSON响应:', text.substring(0, 200));
+    console.error('响应URL:', response.url);
+    console.error('响应状态:', response.status, response.statusText);
+
+    // 如果响应包含HTML错误页面，提取更友好的错误信息
+    if (text.includes('<!DOCTYPE html>') && response.status >= 400) {
+      throw new Error(`服务器错误 (${response.status}): ${response.statusText}`);
+    }
+
+    throw new Error('服务器返回了非JSON格式的响应');
+  }
+
   if (!response.ok) {
-    const error = await response.json();
+    let error;
+    try {
+      error = await response.json();
+    } catch {
+      const text = await response.text();
+      console.error('错误响应不是JSON格式:', text.substring(0, 200));
+      throw new Error(`请求失败 (${response.status}): ${response.statusText}`);
+    }
     throw new Error(error.message || '请求失败');
   }
 
   const result = await response.json();
 
-  // 处理标准API响应格��� { success: true, data: ... }
+  // 处理标准API响应格式 { success: true, data: ... }
   if (result && typeof result === 'object' && 'success' in result) {
     if (!result.success) {
       throw new Error(result.message || '请求失败');
@@ -54,12 +77,6 @@ export async function getPublicPlaylists(params: PlaylistQueryParams = {}): Prom
  */
 export async function getPlaylistById(id: number): Promise<PlaylistDetailResponse> {
   const response = await fetch(`${API_BASE}/${id}`);
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || '获取歌单详情失败');
-  }
-
   return handleApiResponse<PlaylistDetailResponse>(response);
 }
 
