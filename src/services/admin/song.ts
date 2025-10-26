@@ -139,7 +139,7 @@ function normalizeAlbum(album?: AdminAlbum | null): Album | undefined {
 }
 
 function normalizeSong(song: AdminSong): Song {
-  return {
+  const normalized = {
     id: song.id,
     title: song.title,
     duration: song.duration ?? null,
@@ -158,6 +158,8 @@ function normalizeSong(song: AdminSong): Song {
       description: songTag.tag.description || undefined,
     })) : undefined,
   };
+
+  return normalized;
 }
 
 // ==================== 歌曲管理 ====================
@@ -205,7 +207,7 @@ export async function createSong(data: SongFormData): Promise<Song> {
     title: data.title,
     duration: data.duration?.trim() || undefined,
     fileUrl: data.fileUrl?.trim() || undefined,
-    cover: data.coverUrl?.trim() || undefined,
+    coverUrl: data.coverUrl?.trim() || undefined,  // 修复字段名
     artistId: data.artistId,
     albumId: data.albumId || undefined,
     tagIds: data.tagIds,
@@ -231,7 +233,7 @@ export async function updateSong(id: number, data: SongFormData): Promise<Song> 
     title: data.title,
     duration: data.duration?.trim() || undefined,
     fileUrl: data.fileUrl?.trim() || undefined,
-    cover: data.coverUrl?.trim() || undefined,
+    coverUrl: data.coverUrl?.trim() || undefined,  // 修复字段名
     artistId: data.artistId,
     albumId: data.albumId || undefined,
     tagIds: data.tagIds,

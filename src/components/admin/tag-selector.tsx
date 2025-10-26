@@ -111,7 +111,6 @@ export function TagSelector({
     <div className="space-y-3">
       <div>
         <Label>标签</Label>
-        <p className="text-xs text-slate-500 mt-1">选择歌曲标签，用于推荐算法</p>
       </div>
 
       {/* 已选择的标签 */}
@@ -150,7 +149,6 @@ export function TagSelector({
 
       {/* 可选择的标签 */}
       <div className="space-y-2">
-        <Label className="text-sm text-slate-600">可选标签</Label>
         {isLoading ? (
           <div className="flex flex-wrap gap-2">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -190,13 +188,6 @@ export function TagSelector({
           </div>
         )}
       </div>
-
-      {/* 提示信息 */}
-      {!disabled && selectedTags.length === 0 && (
-        <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded">
-          建议选择相关标签，以便更好地为用户推荐歌曲
-        </div>
-      )}
     </div>
   );
 }

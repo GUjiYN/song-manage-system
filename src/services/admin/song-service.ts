@@ -54,7 +54,20 @@ export async function listSongs(params: {
   const [items, total] = await Promise.all([
     prisma.song.findMany({
       where,
-      include: songInclude,
+      select: {
+        id: true,
+        title: true,
+        duration: true,
+        cover: true, // 确保包含 cover 字段
+        fileUrl: true,
+        lyrics: true,
+        artistId: true,
+        albumId: true,
+        trackNumber: true,
+        createdAt: true,
+        updatedAt: true,
+        ...songInclude, // 包含关联数据
+      },
       orderBy: { createdAt: 'desc' },
       skip: params.pagination.skip,
       take: params.pagination.take,
@@ -62,8 +75,14 @@ export async function listSongs(params: {
     prisma.song.count({ where }),
   ]);
 
+  // 映射数据库字段到前端期望的字段名
+  const mappedItems = items.map(item => ({
+    ...item,
+    coverUrl: item.cover, // 将 cover 字段映射为 coverUrl
+  }));
+
   return {
-    items,
+    items: mappedItems,
     page: params.pagination.page,
     pageSize: params.pagination.pageSize,
     total,
@@ -121,12 +140,12 @@ export async function createSong(payload: SongCreatePayload) {
   await ensureAlbumExists(payload.albumId ?? null);
   await ensureTagsExist(payload.tagIds);
 
-  return prisma.song.create({
+  const createdSong = await prisma.song.create({
     data: {
       title: payload.title,
       duration: payload.duration ?? null,
       fileUrl: payload.fileUrl,
-      cover: payload.cover,
+      cover: payload.coverUrl,
       lyrics: payload.lyrics,
       artistId: payload.artistId,
       albumId: payload.albumId ?? null,
@@ -139,8 +158,27 @@ export async function createSong(payload: SongCreatePayload) {
           }
         : undefined,
     },
-    include: songInclude,
+    select: {
+      id: true,
+      title: true,
+      duration: true,
+      cover: true,
+      fileUrl: true,
+      lyrics: true,
+      artistId: true,
+      albumId: true,
+      trackNumber: true,
+      createdAt: true,
+      updatedAt: true,
+      ...songInclude,
+    },
   });
+
+  // 映射数据库字段到前端期望的字段名
+  return {
+    ...createdSong,
+    coverUrl: createdSong.cover, // 将 cover 字段映射为 coverUrl
+  };
 }
 
 /**
@@ -149,8 +187,18 @@ export async function createSong(payload: SongCreatePayload) {
 export async function getSongById(id: number) {
   const song = await prisma.song.findUnique({
     where: { id },
-    include: {
-      ...songInclude,
+    select: {
+      id: true,
+      title: true,
+      duration: true,
+      cover: true,
+      fileUrl: true,
+      lyrics: true,
+      artistId: true,
+      albumId: true,
+      trackNumber: true,
+      createdAt: true,
+      updatedAt: true,
       playlistSongs: {
         select: {
           id: true,
@@ -158,6 +206,7 @@ export async function getSongById(id: number) {
           order: true,
         },
       },
+      ...songInclude,
     },
   });
 
@@ -165,7 +214,11 @@ export async function getSongById(id: number) {
     throw new ApiError(404, '歌曲不存在');
   }
 
-  return song;
+  // 映射数据库字段到前端期望的字段名
+  return {
+    ...song,
+    coverUrl: song.cover, // 将 cover 字段映射为 coverUrl
+  };
 }
 
 /**
@@ -207,13 +260,13 @@ export async function updateSong(id: number, payload: SongUpdatePayload) {
     }
   }
 
-  return prisma.song.update({
+  const updatedSong = await prisma.song.update({
     where: { id },
     data: {
       title: payload.title,
       duration: payload.duration ?? undefined,
       fileUrl: payload.fileUrl,
-      cover: payload.cover,
+      cover: payload.coverUrl,
       lyrics: payload.lyrics,
       artistId: payload.artistId,
       albumId:
@@ -224,8 +277,27 @@ export async function updateSong(id: number, payload: SongUpdatePayload) {
           : payload.albumId,
       trackNumber: payload.trackNumber ?? undefined,
     },
-    include: songInclude,
+    select: {
+      id: true,
+      title: true,
+      duration: true,
+      cover: true,
+      fileUrl: true,
+      lyrics: true,
+      artistId: true,
+      albumId: true,
+      trackNumber: true,
+      createdAt: true,
+      updatedAt: true,
+      ...songInclude,
+    },
   });
+
+  // 映射数据库字段到前端期望的字段名
+  return {
+    ...updatedSong,
+    coverUrl: updatedSong.cover, // 将 cover 字段映射为 coverUrl
+  };
 }
 
 /**

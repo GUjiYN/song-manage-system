@@ -59,7 +59,7 @@ export const songCreateSchema = z.object({
   title: z.string().min(1).max(200),
   duration: durationSchema.optional(),
   fileUrl: z.string().url().optional(),
-  cover: z.string().url().optional(),
+  coverUrl: z.string().optional(), // 改为coverUrl，允许相对路径
   lyrics: z.string().optional(),
   artistId: z.number().int().positive(),
   albumId: z.number().int().positive().optional(),

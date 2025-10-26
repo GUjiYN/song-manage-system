@@ -9,9 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { PlaylistFormData } from '@/types/playlist';
 import { useAuth } from '@/contexts/auth-context';
-import { ArrowLeft, Save, Upload, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 
 interface PlaylistFormProps {
   initialData?: Partial<PlaylistFormData>;
@@ -60,9 +61,8 @@ export function PlaylistForm({
       newErrors.description = '描述不能超过500个字符';
     }
 
-    if (formData.coverUrl && !isValidUrl(formData.coverUrl)) {
-      newErrors.coverUrl = '请输入有效的图片URL';
-    }
+    // 移除封面URL的验证，因为现在支持直接上传和URL输入
+    // ImageUpload组件已经包含了相应的验证逻辑
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -157,58 +157,19 @@ export function PlaylistForm({
             )}
           </div>
 
-          {/* 封面URL */}
+          {/* 封面图片 */}
           <div className="space-y-2">
-            <Label htmlFor="coverUrl">
-              封面图片URL
+            <Label>
+              封面图片
               <span className="text-sm text-gray-500 ml-2">（选填）</span>
             </Label>
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <Input
-                  id="coverUrl"
-                  type="url"
-                  placeholder="https://example.com/image.jpg"
-                  value={formData.coverUrl}
-                  onChange={(e) => handleInputChange('coverUrl', e.target.value)}
-                  disabled={isLoading || isSubmitting}
-                  className={errors.coverUrl ? 'border-red-500' : ''}
-                />
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => {
-                  // TODO: 实现图片上传功能
-                  alert('图片上传功能即将推出！');
-                }}
-                disabled={isLoading || isSubmitting}
-              >
-                <Upload className="w-4 h-4" />
-              </Button>
-            </div>
-            {errors.coverUrl && (
-              <p className="text-sm text-red-500">{errors.coverUrl}</p>
-            )}
-            {formData.coverUrl && (
-              <div className="mt-2">
-                <div className="w-full h-32 bg-gray-100 rounded-lg overflow-hidden">
-                  <img
-                    src={formData.coverUrl}
-                    alt="封面预览"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                  <div className="w-full h-32 flex items-center justify-center text-gray-400">
-                    <ImageIcon className="w-8 h-8" />
-                    <span className="ml-2">图片加载失败</span>
-                  </div>
-                </div>
-              </div>
-            )}
+            <ImageUpload
+              value={formData.coverUrl}
+              onChange={(url) => handleInputChange('coverUrl', url)}
+              placeholder="上传歌单封面"
+              maxSize={5}
+              disabled={isLoading || isSubmitting}
+            />
           </div>
 
           {/* 公开设置 */}

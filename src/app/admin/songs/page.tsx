@@ -31,6 +31,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Label } from '@/components/ui/label';
+import { ImageUpload } from '@/components/ui/image-upload';
 import {
   Music,
   Plus,
@@ -125,6 +126,7 @@ export default function AdminSongsPage() {
       };
 
       const response = await getSongs(params);
+
       setSongs(response.songs || []);
       setTotalPages(response.totalPages || 0);
       setCurrentPage(response.page || 1);
@@ -395,12 +397,13 @@ export default function AdminSongsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="coverUrl">封面URL</Label>
-                <Input
-                  id="coverUrl"
+                <Label>封面图片</Label>
+                <ImageUpload
                   value={formData.coverUrl}
-                  onChange={(e) => setFormData({ ...formData, coverUrl: e.target.value })}
-                  placeholder="输入封面图片URL"
+                  onChange={(url) => setFormData({ ...formData, coverUrl: url })}
+                  placeholder="上传歌曲封面"
+                  maxSize={5}
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -713,12 +716,13 @@ export default function AdminSongsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-coverUrl">封面URL</Label>
-              <Input
-                id="edit-coverUrl"
+              <Label>封面图片</Label>
+              <ImageUpload
                 value={formData.coverUrl}
-                onChange={(e) => setFormData({ ...formData, coverUrl: e.target.value })}
-                placeholder="输入封面图片URL"
+                onChange={(url) => setFormData({ ...formData, coverUrl: url })}
+                placeholder="上传歌曲封面"
+                maxSize={5}
+                disabled={isSubmitting}
               />
             </div>
 
