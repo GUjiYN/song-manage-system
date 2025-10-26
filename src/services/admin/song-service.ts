@@ -5,12 +5,16 @@ import type { PaginationResult } from '@/lib/pagination';
 import type { SongCreatePayload, SongUpdatePayload } from '@/lib/validators/admin';
 
 /**
- * 歌曲查询默认返回关联歌手、专辑与分类
+ * 歌曲查询默认返回关联歌手、专辑与标签
  */
 const songInclude = {
   artist: true,
   album: true,
-  categories: true,
+  tags: {
+    include: {
+      tag: true
+    }
+  },
 } satisfies Prisma.SongInclude;
 
 /**
@@ -92,20 +96,20 @@ async function ensureAlbumExists(id?: number | null) {
   }
 }
 
-// 校验传入的分类是否全部存在
+// 校验传入的标签是否全部存在
 /**
- * 校验传入的分类是否全部存在
+ * 校验传入的标签是否全部存在
  */
-async function ensureCategoriesExist(categoryIds?: number[] | null) {
-  if (!categoryIds || categoryIds.length === 0) {
+async function ensureTagsExist(tagIds?: number[] | null) {
+  if (!tagIds || tagIds.length === 0) {
     return;
   }
-  const categories = await prisma.category.findMany({
-    where: { id: { in: categoryIds } },
+  const tags = await prisma.tag.findMany({
+    where: { id: { in: tagIds } },
     select: { id: true },
   });
-  if (categories.length !== categoryIds.length) {
-    throw new ApiError(400, '部分分类不存在');
+  if (tags.length !== tagIds.length) {
+    throw new ApiError(400, '部分标签不存在');
   }
 }
 
@@ -115,7 +119,7 @@ async function ensureCategoriesExist(categoryIds?: number[] | null) {
 export async function createSong(payload: SongCreatePayload) {
   await ensureArtistExists(payload.artistId);
   await ensureAlbumExists(payload.albumId ?? null);
-  await ensureCategoriesExist(payload.categoryIds);
+  await ensureTagsExist(payload.tagIds);
 
   return prisma.song.create({
     data: {
@@ -127,9 +131,11 @@ export async function createSong(payload: SongCreatePayload) {
       artistId: payload.artistId,
       albumId: payload.albumId ?? null,
       trackNumber: payload.trackNumber ?? null,
-      categories: payload.categoryIds
+      tags: payload.tagIds
         ? {
-            connect: payload.categoryIds.map((id) => ({ id })),
+            create: payload.tagIds.map((tagId) => ({
+              tagId,
+            })),
           }
         : undefined,
     },
@@ -180,7 +186,26 @@ export async function updateSong(id: number, payload: SongUpdatePayload) {
 
   await ensureArtistExists(targetArtistId);
   await ensureAlbumExists(targetAlbumId ?? null);
-  await ensureCategoriesExist(payload.categoryIds ?? undefined);
+
+  // 处理标签更新
+  if (payload.tagIds !== undefined) {
+    await ensureTagsExist(payload.tagIds);
+
+    // 先删除现有关联
+    await prisma.songTag.deleteMany({
+      where: { songId: id }
+    });
+
+    // 创建新关联
+    if (payload.tagIds.length > 0) {
+      await prisma.songTag.createMany({
+        data: payload.tagIds.map((tagId) => ({
+          songId: id,
+          tagId,
+        })),
+      });
+    }
+  }
 
   return prisma.song.update({
     where: { id },
@@ -198,12 +223,6 @@ export async function updateSong(id: number, payload: SongUpdatePayload) {
           ? null
           : payload.albumId,
       trackNumber: payload.trackNumber ?? undefined,
-      categories:
-        payload.categoryIds !== undefined
-          ? {
-              set: payload.categoryIds.map((categoryId) => ({ id: categoryId })),
-            }
-          : undefined,
     },
     include: songInclude,
   });

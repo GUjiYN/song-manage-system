@@ -16,6 +16,15 @@ export interface Song {
   // 关联数据
   album?: Album;
   artist?: Artist;
+  categories?: Category[]; // 歌曲的分类标签
+}
+
+// 分类标签类型
+export interface Category {
+  id: number;
+  name: string;
+  color?: string;
+  description?: string;
 }
 
 export interface Album {
@@ -57,6 +66,7 @@ export interface SongFormData {
   fileUrl?: string;
   albumId: number | null;
   artistId: number;
+  tagIds?: number[]; // 新增标签选择
 }
 
 export interface AlbumFormData {

@@ -44,6 +44,7 @@ import { getSongs, createSong, updateSong, deleteSong } from '@/services/admin/s
 import { Song, SongFormData, SongQueryParams } from '@/types/song';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { TagSelector } from '@/components/admin/tag-selector';
 
 export default function AdminSongsPage() {
   const [songs, setSongs] = useState<Song[]>([]);
@@ -65,6 +66,7 @@ export default function AdminSongsPage() {
     fileUrl: '',
     albumId: 0,
     artistId: 0,
+    tagIds: [],
   });
 
   // 时长输入归一化处理 - 全角转半角+自动补零
@@ -153,6 +155,7 @@ export default function AdminSongsPage() {
       fileUrl: '',
       albumId: 0,
       artistId: 0,
+      tagIds: [],
     });
     setEditingSong(null);
   };
@@ -186,6 +189,7 @@ export default function AdminSongsPage() {
       fileUrl: song.fileUrl || '',
       albumId: song.albumId,
       artistId: song.artistId,
+      tagIds: song.categories?.map(cat => cat.id) || [],
     });
     setIsEditDialogOpen(true);
   };
@@ -392,6 +396,13 @@ export default function AdminSongsPage() {
                   placeholder="输入封面图片URL"
                 />
               </div>
+
+              {/* 标签选择 */}
+              <TagSelector
+                selectedTagIds={formData.tagIds}
+                onSelectionChange={(tagIds) => setFormData({ ...formData, tagIds })}
+                maxSelections={5}
+              />
               <div className="flex justify-end space-x-2">
                 <Button
                   type="button"
@@ -435,6 +446,7 @@ export default function AdminSongsPage() {
               <TableHead className="py-3">歌手</TableHead>
               <TableHead className="py-3">专辑</TableHead>
               <TableHead className="py-3">时长</TableHead>
+              <TableHead className="py-3">标签</TableHead>
               <TableHead className="py-3">创建时间</TableHead>
               <TableHead className="text-right pr-6 py-3">操作</TableHead>
             </TableRow>
@@ -477,6 +489,29 @@ export default function AdminSongsPage() {
                       {formatDuration(song.duration)}
                     </div>
                   </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {song.categories && song.categories.length > 0 ? (
+                        song.categories.map((category) => (
+                          <Badge
+                            key={category.id}
+                            variant="secondary"
+                            className="text-xs"
+                            style={{
+                              backgroundColor: `${category.color}20`,
+                              borderColor: category.color,
+                              borderWidth: '1px',
+                              color: category.color,
+                            }}
+                          >
+                            {category.name}
+                          </Badge>
+                        ))
+                      ) : (
+                        <span className="text-xs text-slate-400">无标签</span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-slate-600">
                     {new Date(song.createdAt).toLocaleDateString()}
                   </TableCell>
@@ -513,7 +548,7 @@ export default function AdminSongsPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-12">
+                <TableCell colSpan={7} className="text-center py-12">
                   <Music className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-slate-700 mb-2">
                     {searchQuery ? '没有找到匹配的歌曲' : '还没有添加任何歌曲'}
@@ -679,6 +714,13 @@ export default function AdminSongsPage() {
                 placeholder="输入封面图片URL"
               />
             </div>
+
+            {/* 编辑表单中的标签选择 */}
+            <TagSelector
+              selectedTagIds={formData.tagIds}
+              onSelectionChange={(tagIds) => setFormData({ ...formData, tagIds })}
+              maxSelections={5}
+            />
             <div className="flex justify-end space-x-2">
               <Button
                 type="button"

@@ -53,7 +53,7 @@ export const categoryCreateSchema = z.object({
 
 export const categoryUpdateSchema = categoryCreateSchema.partial();
 
-const categoryIdsSchema = z.array(z.number().int().positive()).optional();
+const tagIdsSchema = z.array(z.number().int().positive()).optional();
 
 export const songCreateSchema = z.object({
   title: z.string().min(1).max(200),
@@ -63,13 +63,13 @@ export const songCreateSchema = z.object({
   lyrics: z.string().optional(),
   artistId: z.number().int().positive(),
   albumId: z.number().int().positive().optional(),
-  categoryIds: categoryIdsSchema,
+  tagIds: tagIdsSchema,
   trackNumber: z.number().int().positive().optional(),
 });
 
 export const songUpdateSchema = songCreateSchema.partial().extend({
   albumId: z.number().int().positive().nullable().optional(),
-  categoryIds: categoryIdsSchema,
+  tagIds: tagIdsSchema,
 });
 
 export type ArtistCreatePayload = z.infer<typeof artistCreateSchema>;

@@ -82,6 +82,14 @@ type AdminSong = {
   updatedAt: string;
   artist?: AdminArtist | null;
   album?: AdminAlbum | null;
+  tags?: Array<{
+    tag: {
+      id: number;
+      name: string;
+      color?: string | null;
+      description?: string | null;
+    };
+  }>;
 };
 
 type PaginatedAdminResponse<T> = {
@@ -143,6 +151,12 @@ function normalizeSong(song: AdminSong): Song {
     updatedAt: song.updatedAt,
     artist: song.artist ? normalizeArtist(song.artist) : undefined,
     album: normalizeAlbum(song.album),
+    categories: song.tags ? song.tags.map(songTag => ({
+      id: songTag.tag.id,
+      name: songTag.tag.name,
+      color: songTag.tag.color || undefined,
+      description: songTag.tag.description || undefined,
+    })) : undefined,
   };
 }
 
@@ -194,6 +208,7 @@ export async function createSong(data: SongFormData): Promise<Song> {
     cover: data.coverUrl?.trim() || undefined,
     artistId: data.artistId,
     albumId: data.albumId || undefined,
+    tagIds: data.tagIds,
   };
 
   const response = await fetch(`${API_BASE}/songs`, {
@@ -219,6 +234,7 @@ export async function updateSong(id: number, data: SongFormData): Promise<Song> 
     cover: data.coverUrl?.trim() || undefined,
     artistId: data.artistId,
     albumId: data.albumId || undefined,
+    tagIds: data.tagIds,
   };
 
   const response = await fetch(`${API_BASE}/songs/${id}`, {
