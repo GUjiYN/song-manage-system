@@ -75,6 +75,19 @@ model Category {
   songs Song[] @relation("SongCategories")
 }
 
+// 标签表
+model Tag {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  color       String   @default("#3B82F6")
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联
+  songs SongTag[]
+}
+
 // 歌曲表
 model Song {
   id          Int      @id @default(autoincrement())
@@ -93,6 +106,7 @@ model Song {
   artist        Artist         @relation(fields: [artistId], references: [id], onDelete: Cascade)
   album         Album?         @relation(fields: [albumId], references: [id], onDelete: SetNull)
   categories    Category[]     @relation("SongCategories")
+  tags          SongTag[]
   playlistSongs PlaylistSong[]
 }
 
@@ -144,6 +158,20 @@ model PlaylistFollow {
 
   // 复合唯一索引
   @@unique([userId, playlistId])
+}
+
+// 歌曲标签关联表
+model SongTag {
+  id     Int @id @default(autoincrement())
+  songId Int
+  tagId  Int
+
+  // 关联
+  song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  // 复合唯一索引
+  @@unique([songId, tagId])
 }
 
 // 枚举

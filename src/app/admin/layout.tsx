@@ -19,7 +19,8 @@ import {
   ChevronDown,
   UserCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Tag
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -134,6 +135,12 @@ function AdminLayoutWrapper({ children }: { children: ReactNode }) {
       href: '/admin/albums',
       icon: Disc,
       current: pathname === '/admin/albums',
+    },
+    {
+      name: '标签管理',
+      href: '/admin/tags',
+      icon: Tag,
+      current: pathname === '/admin/tags',
     },
     {
       name: '用户管理',
