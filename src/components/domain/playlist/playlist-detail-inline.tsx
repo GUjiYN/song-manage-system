@@ -7,6 +7,7 @@ import { Music, ArrowLeft, Heart, Plus, Bookmark, BookmarkCheck } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import { usePlaylistFollow } from "@/hooks/use-playlist-follow";
+import { useFavorites } from "@/hooks/use-favorites";
 import { toast } from "sonner";
 import { PlaylistSelectDialog } from "@/components/domain/playlist/playlist-select-dialog";
 
@@ -23,6 +24,7 @@ export function PlaylistDetailInline({ id, onBack }: PlaylistDetailInlineProps) 
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
 
   const { user } = useAuth();
+  const { isLiked, toggleFavorite } = useFavorites();
 
   // 使用收藏Hook
   const { isFollowing: isFollowingHook, followPlaylist, loadFollowStatus } = usePlaylistFollow({
@@ -79,9 +81,18 @@ export function PlaylistDetailInline({ id, onBack }: PlaylistDetailInlineProps) 
     setShowAddDialog(true);
   };
 
-  // 播放歌曲
-  const handlePlaySong = (song: Song) => {
-    toast.info(`播放功能即将推出！现在播放：${song.title}`);
+  // 收藏歌曲到"我喜欢的音乐"
+  const handleLikeSong = async (song: Song) => {
+    if (!user) {
+      toast.error('请先登录后再使用此功能');
+      return;
+    }
+
+    try {
+      await toggleFavorite(song);
+    } catch (error) {
+      // 错误处理已经在 useFavorites Hook 中完成
+    }
   };
 
   useEffect(() => {
@@ -176,31 +187,28 @@ export function PlaylistDetailInline({ id, onBack }: PlaylistDetailInlineProps) 
 
               {/* 操作按钮 */}
               <div className="flex flex-col gap-2">
-                {/* 始终显示按钮，根据状态控制是否禁用 */}
-                <Button
-                  onClick={handleFollow}
-                  variant={isFollowing ? "outline" : "default"}
-                  size="sm"
-                  disabled={!user || isOwner}
-                  className={isFollowing ? "text-slate-600 hover:text-slate-900" : ""}
-                  title={
-                    !user ? "请先登录" :
-                    isOwner ? "不能收藏自己的歌单" :
-                    isFollowing ? "取消收藏此歌单" : "收藏此歌单"
-                  }
-                >
-                  {isFollowing ? (
-                    <>
-                      <BookmarkCheck className="w-4 h-4 mr-2" />
-                      取消收藏
-                    </>
-                  ) : (
-                    <>
-                      <Bookmark className="w-4 h-4 mr-2" />
-                      {!user ? "请先登录" : isOwner ? "自己的歌单" : "收藏歌单"}
-                    </>
-                  )}
-                </Button>
+                {/* 只有不是自己的歌单且用户已登录时才显示收藏按钮 */}
+                {!isOwner && user && (
+                  <Button
+                    onClick={handleFollow}
+                    variant={isFollowing ? "outline" : "default"}
+                    size="sm"
+                    className={isFollowing ? "text-slate-600 hover:text-slate-900" : ""}
+                    title={isFollowing ? "取消收藏此歌单" : "收藏此歌单"}
+                  >
+                    {isFollowing ? (
+                      <>
+                        <BookmarkCheck className="w-4 h-4 mr-2" />
+                        取消收藏
+                      </>
+                    ) : (
+                      <>
+                        <Bookmark className="w-4 h-4 mr-2" />
+                        收藏歌单
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -223,60 +231,83 @@ export function PlaylistDetailInline({ id, onBack }: PlaylistDetailInlineProps) 
       </div>
 
       {/* 歌曲列表 */}
-      <div className="bg-white rounded-lg border border-slate-200">
-        <div className="px-4 py-3 border-b border-slate-200">
+      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
           <h2 className="text-lg font-semibold text-slate-900">歌曲列表</h2>
         </div>
 
-        <div className="px-4 text-slate-500 text-xs font-medium grid grid-cols-[48px_1fr_1fr_80px_120px] gap-2 h-10 items-center border-b border-slate-100">
-          <div className="pl-2">#</div>
+        {/* 表头 */}
+        <div className="px-6 text-slate-600 text-xs font-medium grid grid-cols-[60px_1fr_1fr_100px_140px] gap-4 h-12 items-center border-b border-slate-200 bg-slate-50/50">
+          <div className="pl-1">#</div>
           <div>标题</div>
           <div>专辑</div>
           <div>时长</div>
-          <div className="text-right pr-2">操作</div>
+          <div className="text-right pr-1">操作</div>
         </div>
 
+        {/* 歌曲列表 */}
         {songs && songs.length > 0 ? (
-          <ul>
+          <div className="divide-y divide-slate-100">
             {songs.map((s, idx) => (
-              <li
+              <div
                 key={s.id}
-                className="grid grid-cols-[48px_1fr_1fr_80px_120px] gap-2 items-center h-14 hover:bg-slate-50 transition-colors border-b border-slate-100"
+                className="grid grid-cols-[60px_1fr_1fr_100px_140px] gap-4 items-center h-16 hover:bg-slate-50 transition-colors group px-6"
               >
-                <div className="pl-2 text-slate-400 text-sm tabular-nums">{String(idx + 1).padStart(2, '0')}</div>
-                <div className="min-w-0 flex items-center gap-3">
-                  <div className="min-w-0">
-                    <p className="text-slate-900 truncate">{s.title}</p>
-                    <p className="text-slate-500 text-xs truncate">{s.artist?.name}</p>
-                  </div>
+                {/* 序号 */}
+                <div className="text-slate-400 text-sm tabular-nums font-medium">
+                  {String(idx + 1).padStart(2, '0')}
                 </div>
-                <div className="text-slate-600 truncate">{s.album?.title ?? '-'}</div>
-                <div className="text-slate-500 text-sm tabular-nums">{s.duration ?? '--:--'}</div>
-                <div className="text-right pr-2">
+
+                {/* 歌曲标题和艺术家 */}
+                <div className="min-w-0">
+                  <p className="text-slate-900 font-medium truncate mb-0.5 group-hover:text-slate-700 transition-colors">
+                    {s.title}
+                  </p>
+                  <p className="text-slate-500 text-xs truncate">{s.artist?.name}</p>
+                </div>
+
+                {/* 专辑 */}
+                <div className="text-slate-600 text-sm truncate">
+                  {s.album?.title ?? '-'}
+                </div>
+
+                {/* 时长 */}
+                <div className="text-slate-500 text-sm tabular-nums font-medium">
+                  {s.duration ?? '--:--'}
+                </div>
+
+                {/* 操作按钮 */}
+                <div className="text-right">
                   <div className="flex items-center justify-end gap-1">
                     <button
-                      onClick={() => handlePlaySong(s)}
-                      className="p-1.5 rounded hover:bg-slate-100 text-slate-600"
-                      title="播放"
+                      onClick={() => handleLikeSong(s)}
+                      className={`p-2 rounded-lg transition-all transform hover:scale-110 ${
+                        isLiked(s.id)
+                          ? 'text-red-500 hover:text-red-600'
+                          : 'text-slate-400 hover:text-red-500'
+                      }`}
+                      title={isLiked(s.id) ? '取消喜欢' : '添加到喜欢的音乐'}
                     >
-                      <Music className="w-3.5 h-3.5" />
+                      <Heart
+                        className={`w-4 h-4 ${isLiked(s.id) ? 'fill-current' : ''}`}
+                      />
                     </button>
                     <button
                       onClick={() => handleAddToPlaylist(s)}
-                      className="p-1.5 rounded hover:bg-slate-100 text-slate-600"
+                      className="p-2 rounded-lg hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-all"
                       title="添加到歌单"
                     >
-                      <Plus className="w-3.5 h-3.5" />
+                      <Plus className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         ) : (
-          <div className="py-14 text-center text-slate-500">
-            <Music className="w-12 h-12 mx-auto mb-3 text-slate-400" />
-            <p>暂无歌曲</p>
+          <div className="py-16 text-center text-slate-500">
+            <Music className="w-16 h-16 mx-auto mb-4 text-slate-300" />
+            <p className="text-slate-400">暂无歌曲</p>
           </div>
         )}
       </div>
