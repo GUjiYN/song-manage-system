@@ -69,8 +69,18 @@ export async function listAlbums(params: {
   const [items, total] = await Promise.all([
     prisma.album.findMany({
       where,
+      select: {
+        id: true,
+        title: true,
+        cover: true, // 确保包含 cover 字段
+        description: true,
+        artistId: true,
+        releaseDate: true,
+        createdAt: true,
+        updatedAt: true,
+        ...albumInclude, // 包含关联数据
+      },
       orderBy: { createdAt: 'desc' },
-      include: albumInclude,
       skip: params.pagination.skip,
       take: params.pagination.take,
     }),
@@ -97,7 +107,7 @@ export async function createAlbum(payload: AlbumCreatePayload): Promise<AlbumWit
 
   const releaseDate = parseDate(payload.releaseDate ?? undefined);
 
-  return prisma.album.create({
+  const createdAlbum = await prisma.album.create({
     data: {
       title: payload.title,
       cover: payload.cover,
@@ -105,8 +115,20 @@ export async function createAlbum(payload: AlbumCreatePayload): Promise<AlbumWit
       artistId: payload.artistId,
       releaseDate,
     },
-    include: albumInclude,
+    select: {
+      id: true,
+      title: true,
+      cover: true,
+      description: true,
+      artistId: true,
+      releaseDate: true,
+      createdAt: true,
+      updatedAt: true,
+      ...albumInclude,
+    },
   });
+
+  return createdAlbum;
 }
 
 /**
@@ -149,7 +171,7 @@ export async function updateAlbum(id: number, payload: AlbumUpdatePayload): Prom
 
   const releaseDate = parseDate(payload.releaseDate ?? undefined);
 
-  return prisma.album.update({
+  const updatedAlbum = await prisma.album.update({
     where: { id },
     data: {
       title: payload.title,
@@ -158,8 +180,20 @@ export async function updateAlbum(id: number, payload: AlbumUpdatePayload): Prom
       artistId: payload.artistId,
       releaseDate,
     },
-    include: albumInclude,
+    select: {
+      id: true,
+      title: true,
+      cover: true,
+      description: true,
+      artistId: true,
+      releaseDate: true,
+      createdAt: true,
+      updatedAt: true,
+      ...albumInclude,
+    },
   });
+
+  return updatedAlbum;
 }
 
 /**

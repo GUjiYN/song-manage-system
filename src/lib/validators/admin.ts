@@ -35,7 +35,7 @@ const durationSchema = z
 
 export const albumCreateSchema = z.object({
   title: z.string().min(1).max(200),
-  cover: z.string().url().optional(),
+  cover: z.string().optional(), // 移除URL验证，允许相对路径
   releaseDate: dateOnlySchema.optional(),
   description: z.string().max(5000).optional(),
   artistId: z.number().int().positive(),

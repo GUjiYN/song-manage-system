@@ -31,6 +31,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Label } from '@/components/ui/label';
+import { ImageUpload } from '@/components/ui/image-upload';
 import {
   Disc,
   Plus,
@@ -281,12 +282,13 @@ export default function AdminAlbumsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="coverUrl">封面URL</Label>
-                <Input
-                  id="coverUrl"
+                <Label>封面图片</Label>
+                <ImageUpload
                   value={formData.coverUrl}
-                  onChange={(e) => setFormData({ ...formData, coverUrl: e.target.value })}
-                  placeholder="输入封面图片URL"
+                  onChange={(url) => setFormData({ ...formData, coverUrl: url })}
+                  placeholder="上传专辑封面"
+                  maxSize={5}
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="flex justify-end space-x-2">
@@ -496,12 +498,13 @@ export default function AdminAlbumsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-coverUrl">封面URL</Label>
-              <Input
-                id="edit-coverUrl"
+              <Label>封面图片</Label>
+              <ImageUpload
                 value={formData.coverUrl}
-                onChange={(e) => setFormData({ ...formData, coverUrl: e.target.value })}
-                placeholder="输入封面图片URL"
+                onChange={(url) => setFormData({ ...formData, coverUrl: url })}
+                placeholder="上传专辑封面"
+                maxSize={5}
+                disabled={isSubmitting}
               />
             </div>
             <div className="flex justify-end space-x-2">
