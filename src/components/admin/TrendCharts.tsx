@@ -100,7 +100,7 @@ export function TrendCharts({ trendData }: TrendChartsProps) {
           <div className="bg-sky-100 p-1.5 rounded-lg mr-2">
             <PieChartIcon className="h-5 w-5 text-sky-600" />
           </div>
-          歌曲分类分布
+          歌曲标签分布
         </h3>
         {trendData.categoryDistribution.length > 0 ? (
           <ResponsiveContainer width="100%" height={180}>
@@ -111,9 +111,10 @@ export function TrendCharts({ trendData }: TrendChartsProps) {
                 cy="50%"
                 labelLine={false}
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                outerRadius={80}
+                outerRadius={75}
                 fill="#8884d8"
                 dataKey="count"
+                labelStyle={{ fontSize: '10px' }}
               >
                 {trendData.categoryDistribution.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -131,7 +132,7 @@ export function TrendCharts({ trendData }: TrendChartsProps) {
           </ResponsiveContainer>
         ) : (
           <div className="flex items-center justify-center h-[180px] text-slate-400">
-            <p>暂无分类数据</p>
+            <p>暂无标签数据</p>
           </div>
         )}
       </div>

@@ -47,6 +47,7 @@ export interface SystemStats {
     songsWithoutDuration: number;
     emptyAlbums: number;
     emptyPlaylists: number;
+    coverageRate?: number;
   };
   trendData: {
     dailyStats: Array<{
@@ -510,21 +511,27 @@ async function getTrendData() {
     })
   );
 
-  // 获取分类分布
-  const categories = await prisma.category.findMany({
+  // 获取标签分布（替代原来的分类分布）
+  const tags = await prisma.tag.findMany({
     select: {
       name: true,
-      songs: {
+      _count: {
         select: {
-          id: true,
-        },
-      },
+          songs: true
+        }
+      }
     },
+    orderBy: {
+      songs: {
+        _count: 'desc'
+      }
+    },
+    take: 8 // 只取前8个最热门的标签
   });
 
-  const categoryDistribution = categories.map(category => ({
-    name: category.name,
-    count: category.songs.length,
+  const categoryDistribution = tags.map(tag => ({
+    name: tag.name,
+    count: tag._count.songs,
   }));
 
   return {
@@ -532,3 +539,4 @@ async function getTrendData() {
     categoryDistribution,
   };
 }
+
