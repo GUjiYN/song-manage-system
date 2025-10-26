@@ -28,6 +28,7 @@ model User {
 
   // 关联
   playlists Playlist[]
+  follows    PlaylistFollow[]
 }
 
 // 艺术家表
@@ -108,8 +109,9 @@ model Playlist {
   updatedAt   DateTime     @updatedAt
 
   // 关联
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   playlistSongs PlaylistSong[]
+  followers     PlaylistFollow[]
 }
 
 // 歌单歌曲关联表
@@ -127,6 +129,21 @@ model PlaylistSong {
   // 复合唯一索引
   @@unique([playlistId, songId])
   @@unique([playlistId, order])
+}
+
+// 歌单收藏关系表
+model PlaylistFollow {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  playlistId Int
+  createdAt  DateTime @default(now())
+
+  // 关联
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  // 复合唯一索引
+  @@unique([userId, playlistId])
 }
 
 // 枚举

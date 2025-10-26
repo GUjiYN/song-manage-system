@@ -58,7 +58,10 @@ export default function DiscoverPage() {
       {/* 主内容：在页内展示歌单详情；未选择时显示网格 */}
       {selectedId ? (
         <div className="space-y-4">
-          <PlaylistDetailInline id={selectedId} />
+          <PlaylistDetailInline
+            id={selectedId}
+            onBack={() => setSelectedId(null)}
+          />
         </div>
       ) : (
         <div className="space-y-10">

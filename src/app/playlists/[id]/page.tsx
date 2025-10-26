@@ -16,6 +16,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { usePlaylistFollow } from '@/hooks/use-playlist-follow';
 
 export default function PlaylistDetailPage() {
   const params = useParams();
@@ -25,10 +26,17 @@ export default function PlaylistDetailPage() {
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [isFollowing, setIsFollowing] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   const playlistId = Number(params.id);
+
+  // 使用收藏Hook
+  const { isFollowing, followPlaylist, loadFollowStatus } = usePlaylistFollow({
+    onSuccess: (playlistId, isFollowing) => {
+      // 收藏状态更新成功后，更新本地歌单状态
+      setPlaylist(prev => prev ? { ...prev, isFollowing } : null);
+    },
+  });
 
   // 加载歌单详情
   const loadPlaylist = async () => {
@@ -38,7 +46,11 @@ export default function PlaylistDetailPage() {
 
       const data = await getPlaylistById(playlistId);
       setPlaylist(data);
-      setIsFollowing(data.isFollowing || false);
+
+      // 使用Hook加载收藏状态
+      if (data.id) {
+        loadFollowStatus([data.id]);
+      }
     } catch (err) {
       setError(err instanceof Error ? err : new Error('加载失败'));
     } finally {
@@ -89,9 +101,9 @@ export default function PlaylistDetailPage() {
 
   // 收藏/取消收藏
   const handleFollow = async () => {
-    // TODO: 实现收藏功能
-    setIsFollowing(!isFollowing);
-    toast.success(isFollowing ? '已取消收藏' : '收藏成功');
+    if (!playlist) return;
+
+    await followPlaylist(playlist);
   };
 
   // 移除歌曲

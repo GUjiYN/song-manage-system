@@ -34,9 +34,12 @@ export function PlaylistHeader({
       playlistId: playlist.id,
       isOwner,
       hasOnEdit: !!onEdit,
+      hasOnFollow: !!onFollow,
+      isFollowing,
       userId: user?.id,
       creatorId: playlist.creatorId,
-      creatorName: playlist.creator?.username
+      creatorName: playlist.creator?.username,
+      shouldShowFollowButton: !isOwner && !!user && !!onFollow
     });
   }
 
