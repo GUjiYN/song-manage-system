@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { handleRouteError, successResponse, errorResponse } from '@/lib/http';
 import { playlistUpdateSchema } from '@/lib/validators/playlists';
 import { Prisma } from '@/generated/prisma';
+import { deletePlaylist as deletePlaylistService } from '@/services/playlist-service';
 
 const playlistWithRelations = Prisma.validator<Prisma.PlaylistDefaultArgs>()({
   include: {
@@ -177,6 +178,23 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     });
 
     return successResponse(mapPlaylistResponse(updated, false));
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}
+
+export async function DELETE(_request: NextRequest, context: RouteContext) {
+  try {
+    const user = await requireUser();
+    const { id } = await context.params;
+    const playlistId = Number(id);
+
+    if (!playlistId || Number.isNaN(playlistId)) {
+      return errorResponse('无效的歌单 ID', 400);
+    }
+
+    await deletePlaylistService(playlistId, user.id);
+    return successResponse({ message: '删除成功' });
   } catch (error) {
     return handleRouteError(error);
   }

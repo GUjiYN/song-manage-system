@@ -8,7 +8,7 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Search, Music, ListMusic, Heart, Compass, Library, Home, ChevronRight, ChevronDown, Plus, ArrowLeft, ChevronDown as ChevronDownIcon, User, LogOut, Settings } from 'lucide-react';
+import { Search, Music, ListMusic, Heart, Compass, Library, Home, ChevronRight, ChevronDown, Plus, ArrowLeft, ChevronDown as ChevronDownIcon, User, LogOut, Settings, MoreHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -21,9 +21,10 @@ import {
 import { PlaylistDialog } from '@/components/domain/playlist/playlist-dialog';
 import { PlaylistDetailInline } from '@/components/domain/playlist/playlist-detail-inline';
 import { useAuth } from '@/contexts/auth-context';
-import { getMyPlaylists, getFollowedPlaylists } from '@/services/client/playlist';
+import { getMyPlaylists, getFollowedPlaylists, deletePlaylist, unfollowPlaylist } from '@/services/client/playlist';
 import type { Playlist } from '@/types/playlist';
 import { UserRole } from '@/types/auth';
+import { toast } from 'sonner';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -94,6 +95,32 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
   const handleCreateSuccess = (newPlaylist: Playlist) => {
     onCreatePlaylist?.(newPlaylist);
     reloadSidebarPlaylists();
+  };
+
+  const handleDeleteMyPlaylistClick = async (playlistId: number) => {
+    try {
+      await deletePlaylist(playlistId);
+      setMyPlaylists((prev) => prev.filter((p) => p.id !== playlistId));
+      if (selectedPlaylistId === playlistId) {
+        setSelectedPlaylistId(null);
+      }
+      toast.success('歌单已删除');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '删除歌单失败，请稍后再试');
+    }
+  };
+
+  const handleUnfollowPlaylistClick = async (playlistId: number) => {
+    try {
+      await unfollowPlaylist(playlistId);
+      setFollowedPlaylists((prev) => prev.filter((p) => p.id !== playlistId));
+      if (selectedPlaylistId === playlistId) {
+        setSelectedPlaylistId(null);
+      }
+      toast.success('已移除收藏歌单');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '取消收藏失败，请稍后再试');
+    }
   };
 
   useEffect(() => {
@@ -206,17 +233,39 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
                     <ul className="space-y-1">
                       {myPlaylists.map((p) => (
                         <li key={p.id}>
-                          <button
-                            onClick={() => setSelectedPlaylistId(p.id)}
-                            className={`w-full text-left flex items-center gap-2 px-2 py-2 rounded-md text-sm ${
-                              selectedPlaylistId === p.id
-                                ? 'bg-indigo-50 text-indigo-700'
-                                : 'text-slate-600 hover:bg-slate-100'
-                            }`}
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                            <span className="truncate" title={p.name}>{p.name}</span>
-                          </button>
+                          <div className="group flex items-center gap-1 rounded-md">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedPlaylistId(p.id)}
+                              className={`flex-1 text-left flex items-center gap-2 px-2 py-2 rounded-md text-sm transition-colors ${
+                                selectedPlaylistId === p.id
+                                  ? 'bg-indigo-50 text-indigo-700'
+                                  : 'text-slate-600 hover:bg-slate-100'
+                              }`}
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                              <span className="truncate" title={p.name}>{p.name}</span>
+                            </button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  type="button"
+                                  aria-label="更多操作"
+                                  className="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                                >
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-32">
+                                <DropdownMenuItem
+                                  onSelect={() => handleDeleteMyPlaylistClick(p.id)}
+                                  className="text-red-600 data-[highlighted]:bg-red-500 data-[highlighted]:text-white"
+                                >
+                                  删除歌单
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -245,17 +294,39 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
                     <ul className="space-y-1">
                       {followedPlaylists.map((p) => (
                         <li key={p.id}>
-                          <button
-                            onClick={() => setSelectedPlaylistId(p.id)}
-                            className={`w-full text-left flex items-center gap-2 px-2 py-2 rounded-md text-sm ${
-                              selectedPlaylistId === p.id
-                                ? 'bg-indigo-50 text-indigo-700'
-                                : 'text-slate-600 hover:bg-slate-100'
-                            }`}
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                            <span className="truncate" title={p.name}>{p.name}</span>
-                          </button>
+                          <div className="group flex items-center gap-1 rounded-md">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedPlaylistId(p.id)}
+                              className={`flex-1 text-left flex items-center gap-2 px-2 py-2 rounded-md text-sm transition-colors ${
+                                selectedPlaylistId === p.id
+                                  ? 'bg-indigo-50 text-indigo-700'
+                                  : 'text-slate-600 hover:bg-slate-100'
+                              }`}
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                              <span className="truncate" title={p.name}>{p.name}</span>
+                            </button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  type="button"
+                                  aria-label="更多操作"
+                                  className="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                                >
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-32">
+                                <DropdownMenuItem
+                                  onSelect={() => handleUnfollowPlaylistClick(p.id)}
+                                  className="text-red-600 data-[highlighted]:bg-red-500 data-[highlighted]:text-white"
+                                >
+                                  删除收藏
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </li>
                       ))}
                     </ul>

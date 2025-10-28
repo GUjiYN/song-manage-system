@@ -250,8 +250,9 @@ export function PlaylistDetailInline({ id, onBack }: PlaylistDetailInlineProps) 
         </div>
 
         {/* 表头 */}
-        <div className="px-6 text-slate-600 text-xs font-medium grid grid-cols-[60px_1fr_1fr_100px_140px] gap-4 h-12 items-center border-b border-slate-200 bg-slate-50/50">
+        <div className="px-6 text-slate-600 text-xs font-medium grid grid-cols-[60px_56px_1fr_1fr_100px_140px] gap-4 h-12 items-center border-b border-slate-200 bg-slate-50/50">
           <div className="pl-1">#</div>
+          <div className="text-center">封面</div>
           <div>标题</div>
           <div>专辑</div>
           <div>时长</div>
@@ -264,11 +265,26 @@ export function PlaylistDetailInline({ id, onBack }: PlaylistDetailInlineProps) 
             {songs.map((s, idx) => (
               <div
                 key={s.id}
-                className="grid grid-cols-[60px_1fr_1fr_100px_140px] gap-4 items-center h-16 hover:bg-slate-50 transition-colors group px-6"
+                className="grid grid-cols-[60px_56px_1fr_1fr_100px_140px] gap-4 items-center h-16 hover:bg-slate-50 transition-colors group px-6"
               >
                 {/* 序号 */}
                 <div className="text-slate-400 text-sm tabular-nums font-medium">
                   {String(idx + 1).padStart(2, '0')}
+                </div>
+
+                {/* 封面 */}
+                <div className="flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-md overflow-hidden bg-slate-200 flex items-center justify-center border border-slate-100">
+                    {s.album?.coverUrl ? (
+                      <img
+                        src={s.album.coverUrl}
+                        alt={s.album?.title ? `${s.album.title} 封面` : `${s.title} 封面`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Music className="w-5 h-5 text-slate-400" />
+                    )}
+                  </div>
                 </div>
 
                 {/* 歌曲标题和艺术家 */}
