@@ -1,11 +1,11 @@
-import type { Prisma } from '@/generated/prisma';
+﻿import type { Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
 import { ApiError } from '@/lib/http';
 import type { PaginationResult } from '@/lib/pagination';
 import type { AlbumCreatePayload, AlbumUpdatePayload } from '@/lib/validators/admin';
 
 /**
- * 专辑查询默认返回关联艺术家与歌曲
+ * 涓撹緫鏌ヨ榛樿杩斿洖鍏宠仈鑹烘湳瀹朵笌姝屾洸
  */
 const albumInclude = {
   artist: true,
@@ -17,38 +17,33 @@ type AlbumWithRelations = Prisma.AlbumGetPayload<{ include: typeof albumInclude 
 const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
- * 将 YYYY-MM-DD 字符串解析为日期对象（UTC 零点）并校验有效性
+ * 灏?YYYY-MM-DD 瀛楃涓茶В鏋愪负鏃ユ湡瀵硅薄锛圲TC 闆剁偣锛夊苟鏍￠獙鏈夋晥鎬?
  */
 function parseDate(value?: string | null) {
   if (!value) {
     return undefined;
   }
-
   if (!DATE_ONLY_REGEX.test(value)) {
-    throw new ApiError(400, '日期格式需为 YYYY-MM-DD');
+    throw new ApiError(400, 'Invalid date format, expected YYYY-MM-DD');
   }
-
   const [yearStr, monthStr, dayStr] = value.split('-');
   const year = Number(yearStr);
   const month = Number(monthStr);
   const day = Number(dayStr);
-
   const date = new Date(Date.UTC(year, month - 1, day));
-
   if (
     Number.isNaN(date.getTime()) ||
     date.getUTCFullYear() !== year ||
     date.getUTCMonth() + 1 !== month ||
     date.getUTCDate() !== day
   ) {
-    throw new ApiError(400, '无效的日期值');
+    throw new ApiError(400, 'Invalid date');
   }
-
   return date;
 }
 
 /**
- * 分页查询专辑，支持名称搜索与艺术家筛选
+ * 鍒嗛〉鏌ヨ涓撹緫锛屾敮鎸佸悕绉版悳绱笌鑹烘湳瀹剁瓫閫?
  */
 export async function listAlbums(params: {
   pagination: PaginationResult;
@@ -72,13 +67,13 @@ export async function listAlbums(params: {
       select: {
         id: true,
         title: true,
-        cover: true, // 确保包含 cover 字段
+        cover: true, // 纭繚鍖呭惈 cover 瀛楁
         description: true,
         artistId: true,
         releaseDate: true,
         createdAt: true,
         updatedAt: true,
-        ...albumInclude, // 包含关联数据
+        ...albumInclude, // 鍖呭惈鍏宠仈鏁版嵁
       },
       orderBy: { createdAt: 'desc' },
       skip: params.pagination.skip,
@@ -97,12 +92,12 @@ export async function listAlbums(params: {
 }
 
 /**
- * 创建专辑前校验关联艺术家并解析发布日期
+ * 鍒涘缓涓撹緫鍓嶆牎楠屽叧鑱旇壓鏈骞惰В鏋愬彂甯冩棩鏈?
  */
 export async function createAlbum(payload: AlbumCreatePayload): Promise<AlbumWithRelations> {
   const artist = await prisma.artist.findUnique({ where: { id: payload.artistId }, select: { id: true } });
   if (!artist) {
-    throw new ApiError(400, '关联的艺术家不存在');
+    throw new ApiError(400, 'Artist does not exist');
   }
 
   const releaseDate = parseDate(payload.releaseDate ?? undefined);
@@ -132,7 +127,7 @@ export async function createAlbum(payload: AlbumCreatePayload): Promise<AlbumWit
 }
 
 /**
- * 获取专辑详情，包含歌曲与艺术家信息
+ * 鑾峰彇涓撹緫璇︽儏锛屽寘鍚瓕鏇蹭笌鑹烘湳瀹朵俊鎭?
  */
 export async function getAlbumById(id: number): Promise<AlbumWithRelations> {
   const album = await prisma.album.findUnique({
@@ -148,38 +143,37 @@ export async function getAlbumById(id: number): Promise<AlbumWithRelations> {
   });
 
   if (!album) {
-    throw new ApiError(404, '专辑不存在');
+    throw new ApiError(404, 'Album not found');
   }
 
   return album;
 }
 
 /**
- * 校验请求体与关联数据后更新专辑
+ * 鏍￠獙璇锋眰浣撲笌鍏宠仈鏁版嵁鍚庢洿鏂颁笓杈?
  */
 export async function updateAlbum(id: number, payload: AlbumUpdatePayload): Promise<AlbumWithRelations> {
   if (Object.keys(payload).length === 0) {
-    throw new ApiError(400, '请求体不能为空');
+    throw new ApiError(400, 'Request body cannot be empty');
   }
-
   if (payload.artistId) {
     const artist = await prisma.artist.findUnique({ where: { id: payload.artistId }, select: { id: true } });
     if (!artist) {
-      throw new ApiError(400, '关联的艺术家不存在');
+      throw new ApiError(400, 'Artist does not exist');
     }
   }
-
-  const releaseDate = parseDate(payload.releaseDate ?? undefined);
-
+  // Only include defined fields to avoid passing undefined to Prisma
+  const data: Prisma.AlbumUpdateInput = {};
+  if (payload.title !== undefined) data.title = payload.title;
+  if (payload.cover !== undefined) data.cover = payload.cover;
+  if (payload.description !== undefined) data.description = payload.description;
+  if (payload.artistId !== undefined) data.artistId = payload.artistId;
+  if (payload.releaseDate !== undefined) {
+    data.releaseDate = parseDate(payload.releaseDate);
+  }
   const updatedAlbum = await prisma.album.update({
     where: { id },
-    data: {
-      title: payload.title,
-      cover: payload.cover,
-      description: payload.description,
-      artistId: payload.artistId,
-      releaseDate,
-    },
+    data,
     select: {
       id: true,
       title: true,
@@ -192,13 +186,16 @@ export async function updateAlbum(id: number, payload: AlbumUpdatePayload): Prom
       ...albumInclude,
     },
   });
-
   return updatedAlbum;
 }
 
 /**
- * 直接按主键删除专辑记录
+ * 鐩存帴鎸変富閿垹闄や笓杈戣褰?
  */
 export async function deleteAlbum(id: number) {
   await prisma.album.delete({ where: { id } });
 }
+
+
+
+

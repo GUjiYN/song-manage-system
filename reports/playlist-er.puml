@@ -1,0 +1,132 @@
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity "User" as User {
+  *id : Int
+  --
+  email : String
+  username : String
+  name : String?
+  avatar : String?
+  role : enum(UserRole)
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "Playlist" as Playlist {
+  *id : Int
+  --
+  name : String
+  description : Text?
+  cover : String?
+  isPublic : Boolean
+  type : enum(PlaylistType)
+  userId : Int
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "PlaylistSong" as PlaylistSong {
+  *id : Int
+  --
+  playlistId : Int
+  songId : Int
+  order : Int
+  addedAt : DateTime
+}
+
+entity "Song" as Song {
+  *id : Int
+  --
+  title : String
+  duration : String?
+  fileUrl : String?
+  cover : String?
+  lyrics : Text?
+  artistId : Int
+  albumId : Int?
+  trackNumber : Int?
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "Artist" as Artist {
+  *id : Int
+  --
+  name : String
+  avatar : String?
+  description : Text?
+  country : String?
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "Album" as Album {
+  *id : Int
+  --
+  title : String
+  cover : String?
+  releaseDate : Date?
+  description : Text?
+  artistId : Int
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "Category" as Category {
+  *id : Int
+  --
+  name : String
+  description : String?
+  color : String?
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "Tag" as Tag {
+  *id : Int
+  --
+  name : String
+  color : String
+  description : String?
+  createdAt : DateTime
+  updatedAt : DateTime
+}
+
+entity "PlaylistTag" as PlaylistTag {
+  *id : Int
+  --
+  playlistId : Int
+  tagId : Int
+}
+
+entity "SongTag" as SongTag {
+  *id : Int
+  --
+  songId : Int
+  tagId : Int
+}
+
+entity "PlaylistFollow" as PlaylistFollow {
+  *id : Int
+  --
+  userId : Int
+  playlistId : Int
+  createdAt : DateTime
+}
+
+User ||--o{ Playlist : creates
+Playlist ||--o{ PlaylistSong : contains
+Song ||--o{ PlaylistSong : listed_in
+Artist ||--o{ Song : performs
+Artist ||--o{ Album : releases
+Album ||--o{ Song : includes
+Song ||..o{ SongTag : tagged_by
+Tag ||--o{ SongTag : tags
+Playlist ||..o{ PlaylistTag : tagged_by
+Tag ||--o{ PlaylistTag : tags
+User ||--o{ PlaylistFollow : follows
+Playlist ||--o{ PlaylistFollow : followed_by
+
+@enduml

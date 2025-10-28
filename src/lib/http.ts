@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { Prisma } from '@/generated/prisma';
 
@@ -25,20 +25,22 @@ export function handleRouteError(error: unknown) {
   if (error instanceof ApiError) {
     return errorResponse(error.message, error.status, error.code);
   }
-
   if (error instanceof ZodError) {
-    return errorResponse('请求数据格式错误', 422, 'VALIDATION_ERROR');
+    return errorResponse('Request validation error', 422, 'VALIDATION_ERROR');
   }
-
+  if (error instanceof Prisma.PrismaClientValidationError) {
+    return errorResponse('Request validation error', 422, 'VALIDATION_ERROR');
+  }
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     if (error.code === 'P2002') {
-      return errorResponse('唯一约束冲突', 409, 'UNIQUE_CONSTRAINT');
+      return errorResponse('Unique constraint violation', 409, 'UNIQUE_CONSTRAINT');
     }
     if (error.code === 'P2025') {
-      return errorResponse('资源不存在', 404, 'NOT_FOUND');
+      return errorResponse('Resource not found', 404, 'NOT_FOUND');
     }
   }
-
   console.error('[API ERROR]', error);
-  return errorResponse('服务器内部错误', 500, 'INTERNAL_ERROR');
+  return errorResponse('Internal server error', 500, 'INTERNAL_ERROR');
 }
+
+
