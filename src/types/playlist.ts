@@ -1,23 +1,9 @@
 /**
- * 歌单相关的类型定义
+ * Playlist related type definitions.
  */
 
 import { User } from './auth';
 
-// 歌曲信息类型
-export interface Song {
-  id: number;
-  title: string;
-  duration: string | null; // 时长（mm:ss）
-  artistId: number;
-  artist: Artist;
-  albumId: number;
-  album: Album;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// 歌手信息类型
 export interface Artist {
   id: number;
   name: string;
@@ -27,7 +13,6 @@ export interface Artist {
   updatedAt: string;
 }
 
-// 专辑信息类型
 export interface Album {
   id: number;
   title: string;
@@ -39,10 +24,26 @@ export interface Album {
   updatedAt: string;
 }
 
-// 歌单类型枚举
+export interface Song {
+  id: number;
+  title: string;
+  duration: string | null;
+  artistId: number;
+  artist: Artist;
+  albumId: number;
+  album: Album;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type PlaylistType = 'NORMAL' | 'FAVORITES';
 
-// 歌单信息类型
+export interface PlaylistTag {
+  id: number;
+  name: string;
+  color?: string | null;
+}
+
 export interface Playlist {
   id: number;
   name: string;
@@ -54,32 +55,29 @@ export interface Playlist {
   updatedAt: string;
   creatorId: number;
   creator: User;
-  tags?: string[]; // 歌单标签
+  tags?: PlaylistTag[];
   _count?: {
-    songs: number; // 歌曲数量
-    followers: number; // 收藏者数量
+    songs: number;
+    followers: number;
   };
-  songs?: Song[]; // 歌单内的歌曲（详情页时使用）
-  isFollowing?: boolean; // 当前用户是否已收藏此歌单
+  songs?: Song[];
+  isFollowing?: boolean;
 }
 
-// 歌单创建/编辑表单数据
 export interface PlaylistFormData {
   name: string;
   description?: string;
   coverUrl?: string;
   isPublic: boolean;
-  tags?: string[];
+  tagIds?: number[];
 }
 
-// 歌单查询参数
 export interface PlaylistQueryParams {
   page?: number;
   limit?: number;
   search?: string;
 }
 
-// 分页响应类型
 export interface PaginatedResponse<T> {
   data: T[];
   pagination: {
@@ -90,8 +88,6 @@ export interface PaginatedResponse<T> {
   };
 }
 
-// 歌单列表响应类型
 export interface PlaylistsResponse extends PaginatedResponse<Playlist> {}
 
-// 歌单详情响应类型
 export interface PlaylistDetailResponse extends Playlist {}

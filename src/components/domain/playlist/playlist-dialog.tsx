@@ -154,7 +154,7 @@ function SimplePlaylistForm({ onSubmit, isLoading = false, onCancel }: SimplePla
   // 处理输入变化
   const handleInputChange = (
     field: keyof PlaylistFormData,
-    value: string | boolean
+    value: string | boolean | number[] | undefined
   ) => {
     setFormData(prev => ({
       ...prev,

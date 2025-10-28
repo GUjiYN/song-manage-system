@@ -27,6 +27,16 @@ const playlistInclude = {
     },
     orderBy: { order: 'asc' },
   },
+  playlistTags: {
+    include: {
+      tag: true,
+    },
+    orderBy: {
+      tag: {
+        name: 'asc',
+      },
+    },
+  },
 } satisfies Prisma.PlaylistInclude;
 
 /**
@@ -69,6 +79,11 @@ export async function listPublicPlaylists(params: { pagination: PaginationResult
     coverUrl: item.cover,
     creator: item.user,
     creatorId: item.userId,
+    tags: item.playlistTags.map(({ tag }) => ({
+      id: tag.id,
+      name: tag.name,
+      color: tag.color ?? null,
+    })),
     _count: {
       songs: item.playlistSongs.length,
       followers: 0, // TODO: 需要添加收藏功能时计算
@@ -90,6 +105,17 @@ export async function listPublicPlaylists(params: { pagination: PaginationResult
  * 创建歌单并默认设定公开状态
  */
 export async function createPlaylist(userId: number, payload: PlaylistCreatePayload) {
+  const tagIds = payload.tagIds ? Array.from(new Set(payload.tagIds)) : [];
+
+  if (tagIds.length > 0) {
+    const validTagCount = await prisma.tag.count({
+      where: { id: { in: tagIds } },
+    });
+    if (validTagCount !== tagIds.length) {
+      throw new ApiError(400, '存在无效的标签');
+    }
+  }
+
   const playlist = await prisma.playlist.create({
     data: {
       name: payload.name,
@@ -97,6 +123,13 @@ export async function createPlaylist(userId: number, payload: PlaylistCreatePayl
       cover: payload.cover,
       isPublic: payload.isPublic ?? true,
       userId,
+      ...(tagIds.length > 0
+        ? {
+            playlistTags: {
+              create: tagIds.map((tagId) => ({ tagId })),
+            },
+          }
+        : {}),
     },
     include: playlistInclude,
   });
@@ -107,6 +140,11 @@ export async function createPlaylist(userId: number, payload: PlaylistCreatePayl
     coverUrl: playlist.cover,
     creator: playlist.user,
     creatorId: playlist.userId,
+    tags: playlist.playlistTags.map(({ tag }) => ({
+      id: tag.id,
+      name: tag.name,
+      color: tag.color ?? null,
+    })),
     _count: {
       songs: playlist.playlistSongs.length,
       followers: 0, // TODO: 需要添加收藏功能时计算
@@ -157,6 +195,11 @@ export async function listUserPlaylists(userId: number, params: { pagination: Pa
     coverUrl: item.cover,
     creator: item.user,
     creatorId: item.userId,
+    tags: item.playlistTags.map(({ tag }) => ({
+      id: tag.id,
+      name: tag.name,
+      color: tag.color ?? null,
+    })),
     _count: {
       songs: item.playlistSongs.length,
       followers: 0, // TODO: 需要添加收藏功能时计算
@@ -191,6 +234,11 @@ export async function getPlaylistDetail(id: number) {
     coverUrl: playlist.cover,
     creator: playlist.user,
     creatorId: playlist.userId,
+    tags: playlist.playlistTags.map(({ tag }) => ({
+      id: tag.id,
+      name: tag.name,
+      color: tag.color ?? null,
+    })),
     _count: {
       songs: playlist.playlistSongs.length,
       followers: 0, // TODO: 需要添加收藏功能时计算
@@ -221,14 +269,39 @@ export async function updatePlaylist(id: number, userId: number, payload: Playli
     throw new ApiError(403, '仅歌单创建者可编辑');
   }
 
+  const tagIds =
+    payload.tagIds !== undefined ? Array.from(new Set(payload.tagIds)) : undefined;
+
+  if (tagIds && tagIds.length > 0) {
+    const validTagCount = await prisma.tag.count({
+      where: { id: { in: tagIds } },
+    });
+    if (validTagCount !== tagIds.length) {
+      throw new ApiError(400, '存在无效的标签');
+    }
+  }
+
+  const data: Prisma.PlaylistUpdateInput = {
+    name: payload.name,
+    description: payload.description,
+    cover: payload.cover,
+    isPublic: payload.isPublic,
+  };
+
+  if (tagIds !== undefined) {
+    data.playlistTags = {
+      deleteMany: {},
+      ...(tagIds.length > 0
+        ? {
+            create: tagIds.map((tagId) => ({ tagId })),
+          }
+        : {}),
+    };
+  }
+
   return prisma.playlist.update({
     where: { id },
-    data: {
-      name: payload.name,
-      description: payload.description,
-      cover: payload.cover,
-      isPublic: payload.isPublic,
-    },
+    data,
     include: playlistInclude,
   });
 }

@@ -15,36 +15,39 @@ function parseSongId(param: string) {
   return id;
 }
 
-export async function GET(_request: NextRequest, context: { params: { id: string } }) {
+export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     await requireRole(MANAGER_ROLES);
-    const id = parseSongId(context.params.id);
-    const song = await getSongById(id);
+    const { id } = await context.params;
+    const songId = parseSongId(id);
+    const song = await getSongById(songId);
     return successResponse(song);
   } catch (error) {
     return handleRouteError(error);
   }
 }
 
-export async function PUT(request: NextRequest, context: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     await requireRole(MANAGER_ROLES);
-    const id = parseSongId(context.params.id);
+    const { id } = await context.params;
+    const songId = parseSongId(id);
 
     const body = await request.json();
     const payload = songUpdateSchema.parse(body);
-    const song = await updateSong(id, payload);
+    const song = await updateSong(songId, payload);
     return successResponse(song);
   } catch (error) {
     return handleRouteError(error);
   }
 }
 
-export async function DELETE(_request: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     await requireRole(MANAGER_ROLES);
-    const id = parseSongId(context.params.id);
-    await deleteSong(id);
+    const { id } = await context.params;
+    const songId = parseSongId(id);
+    await deleteSong(songId);
     return successResponse({ message: '删除成功' });
   } catch (error) {
     return handleRouteError(error);

@@ -1,6 +1,8 @@
 /**
- * 歌单编辑弹窗组件
+ * Playlist edit dialog component.
  */
+
+"use client";
 
 import { useState } from 'react';
 import {
@@ -14,6 +16,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { ImageUpload } from '@/components/ui/image-upload';
+import { TagSelector } from '@/components/admin/tag-selector';
 import { PlaylistFormData, Playlist } from '@/types/playlist';
 import { updatePlaylist } from '@/services/client/playlist';
 import { toast } from 'sonner';
@@ -29,124 +33,114 @@ export function PlaylistEditDialog({
   playlist,
   open,
   onOpenChange,
-  onSuccess
+  onSuccess,
 }: PlaylistEditDialogProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<PlaylistFormData>({
     name: playlist.name,
-    description: playlist.description || '',
-    coverUrl: playlist.coverUrl || '',
+    description: playlist.description ?? '',
+    coverUrl: playlist.coverUrl ?? '',
     isPublic: playlist.isPublic,
-    tags: playlist.tags || [],
+    tagIds: playlist.tags?.map((tag) => tag.id) ?? [],
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // 表单验证
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
+  const validateForm = () => {
+    const nextErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = '歌单名称不能为空';
+      nextErrors.name = '歌单名称不能为空';
     } else if (formData.name.trim().length > 100) {
-      newErrors.name = '歌单名称不能超过100个字符';
+      nextErrors.name = '歌单名称不能超过 100 个字符';
     }
 
     if (formData.description && formData.description.length > 500) {
-      newErrors.description = '描述不能超过500个字符';
+      nextErrors.description = '描述不能超过 500 个字符';
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
-  // 处理表单提交
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const updatedPlaylist = await updatePlaylist(playlist.id, formData);
-      toast.success('歌单信息更新成功');
-      onSuccess(updatedPlaylist);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '更新失败';
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 处理输入变化
   const handleInputChange = (
     field: keyof PlaylistFormData,
-    value: string | boolean | string[]
+    value: string | boolean | number[] | undefined,
   ) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
 
-    // 清除该字段的错误
     if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
+      setErrors((prev) => {
+        const { [field]: _removed, ...rest } = prev;
+        return rest;
       });
     }
   };
 
-  // 处理弹窗关闭
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isLoading) {
-      onOpenChange(isOpen);
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const updated = await updatePlaylist(playlist.id, formData);
+      toast.success('歌单信息更新成功');
+      onSuccess(updated);
+      onOpenChange(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '更新失败';
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDialogChange = (nextOpen: boolean) => {
+    if (!isSubmitting) {
+      onOpenChange(nextOpen);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl">编辑歌单</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 歌单标题 */}
           <div className="space-y-2">
-            <Label htmlFor="name">
+            <Label htmlFor="playlist-name">
               歌单标题 <span className="text-red-500">*</span>
             </Label>
             <Input
-              id="name"
+              id="playlist-name"
               type="text"
               placeholder="给你的歌单起个名字吧～"
               value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              disabled={isLoading}
+              onChange={(event) => handleInputChange('name', event.target.value)}
+              disabled={isSubmitting}
               className={errors.name ? 'border-red-500' : ''}
             />
-            {errors.name && (
-              <p className="text-sm text-red-500">{errors.name}</p>
-            )}
+            {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
           </div>
 
-          {/* 歌单简介 */}
           <div className="space-y-2">
-            <Label htmlFor="description">
-              歌单简介
-              <span className="text-sm text-gray-500 ml-2">（选填）</span>
+            <Label htmlFor="playlist-description">
+              歌单简介 <span className="text-xs text-gray-500">（选填）</span>
             </Label>
             <Textarea
-              id="description"
-              placeholder="介绍一下你的歌单吧，让大家更好地了解～"
+              id="playlist-description"
+              placeholder="介绍一下歌单，让更多小伙伴发现它～"
               value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              disabled={isLoading}
+              onChange={(event) =>
+                handleInputChange('description', event.target.value)
+              }
+              disabled={isSubmitting}
               rows={3}
               className={errors.description ? 'border-red-500' : ''}
             />
@@ -155,68 +149,64 @@ export function PlaylistEditDialog({
             )}
           </div>
 
-          {/* 标签 */}
           <div className="space-y-2">
-            <Label htmlFor="tags">
-              标签
-              <span className="text-sm text-gray-500 ml-2">（选填，用空格分隔）</span>
-            </Label>
-            <Input
-              id="tags"
-              type="text"
-              placeholder="如：流行 摇滚 电子"
-              value={formData.tags?.join(' ') || ''}
-              onChange={(e) => {
-                const tags = e.target.value
-                  .split(' ')
-                  .map(tag => tag.trim())
-                  .filter(tag => tag.length > 0);
-                handleInputChange('tags', tags);
-              }}
-              disabled={isLoading}
+            <Label>歌单封面</Label>
+            <ImageUpload
+              value={formData.coverUrl}
+              onChange={(url) => handleInputChange('coverUrl', url)}
+              placeholder="上传一张超赞的封面吧"
+              disabled={isSubmitting}
+              maxSize={5}
             />
-            <p className="text-sm text-gray-500">
-              用空格分隔多个标签，最多5个标签
+            <p className="text-xs text-gray-500">
+              支持 JPG、PNG、WebP、GIF，大小不超过 5MB
             </p>
           </div>
 
-          {/* 隐私设置 */}
-          <div className="flex items-center justify-between py-4 px-4 bg-gray-50 rounded-lg">
+          <div className="space-y-2">
+            <Label>标签</Label>
+            <TagSelector
+              selectedTagIds={formData.tagIds ?? []}
+              onSelectionChange={(ids) => handleInputChange('tagIds', ids)}
+              disabled={isSubmitting}
+              fetchUrl="/api/tags"
+            />
+            <p className="text-xs text-gray-500">
+              最多选择 10 个标签，帮助其他用户快速了解歌单风格
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-4">
             <div className="space-y-1">
-              <Label htmlFor="isPublic" className="text-base font-medium">
-                隐私歌单
+              <Label htmlFor="playlist-private" className="text-base font-medium">
+                私密歌单
               </Label>
               <p className="text-sm text-gray-500">
-                隐私歌单不能被别人发现
+                仅自己可见时请选择私密；关闭则公开给所有用户
               </p>
             </div>
             <Switch
-              id="isPublic"
+              id="playlist-private"
               checked={!formData.isPublic}
               onCheckedChange={(checked) => handleInputChange('isPublic', !checked)}
-              disabled={isLoading}
+              disabled={isSubmitting}
             />
           </div>
 
-          {/* 操作按钮 */}
           <div className="flex gap-3 pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="flex-1"
             >
               取消
             </Button>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1"
-            >
-              {isLoading ? (
+            <Button type="submit" disabled={isSubmitting} className="flex-1">
+              {isSubmitting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                   保存中...
                 </>
               ) : (

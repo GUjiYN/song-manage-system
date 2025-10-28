@@ -129,12 +129,16 @@ export function PlaylistHeader({
             {/* 标签 */}
             {playlist.tags && playlist.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-6">
-                {playlist.tags.map((tag, index) => (
+                {playlist.tags.map((tag) => (
                   <span
-                    key={index}
-                    className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                    key={tag.id}
+                    className="inline-block rounded-full px-3 py-1 text-sm"
+                    style={{
+                      backgroundColor: `${tag.color ?? '#3B82F6'}20`,
+                      color: tag.color ?? '#3B82F6',
+                    }}
                   >
-                    {tag}
+                    {tag.name}
                   </span>
                 ))}
               </div>

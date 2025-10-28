@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { getPlaylistById } from "@/services/client/playlist";
 import type { Playlist, Song } from "@/types/playlist";
-import { Music, ArrowLeft, Heart, Plus, Bookmark, BookmarkCheck } from "lucide-react";
+import { Music, ArrowLeft, Heart, Plus, Bookmark, BookmarkCheck, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import { usePlaylistFollow } from "@/hooks/use-playlist-follow";
 import { useFavorites } from "@/hooks/use-favorites";
 import { toast } from "sonner";
 import { PlaylistSelectDialog } from "@/components/domain/playlist/playlist-select-dialog";
+import { PlaylistEditDialog } from "@/components/domain/playlist/playlist-edit-dialog";
 
 interface PlaylistDetailInlineProps {
   id: number;
@@ -22,6 +23,7 @@ export function PlaylistDetailInline({ id, onBack }: PlaylistDetailInlineProps) 
   const [error, setError] = useState<Error | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const { user } = useAuth();
   const { isLiked, toggleFavorite } = useFavorites();
@@ -187,6 +189,17 @@ export function PlaylistDetailInline({ id, onBack }: PlaylistDetailInlineProps) 
 
               {/* 操作按钮 */}
               <div className="flex flex-col gap-2">
+                {isOwner && (
+                  <Button
+                    onClick={() => setIsEditOpen(true)}
+                    variant="ghost"
+                    size="sm"
+                    className="p-2 hover:bg-slate-100 border border-slate-300 rounded-lg"
+                    title="编辑歌单"
+                  >
+                    <Edit className="w-5 h-5 text-slate-600" />
+                  </Button>
+                )}
                 {/* 只有不是自己的歌单且用户已登录时才显示收藏按钮 */}
                 {!isOwner && user && (
                   <Button
@@ -322,6 +335,32 @@ export function PlaylistDetailInline({ id, onBack }: PlaylistDetailInlineProps) 
             setShowAddDialog(false);
             setSelectedSong(null);
             toast.success('已添加到歌单');
+          }}
+        />
+      )}
+
+      {isOwner && playlist && (
+        <PlaylistEditDialog
+          playlist={playlist}
+          open={isEditOpen}
+          onOpenChange={setIsEditOpen}
+          onSuccess={(updated) => {
+            setPlaylist(prev => {
+              if (!prev) {
+                return updated;
+              }
+              return {
+                ...prev,
+                name: updated.name,
+                description: updated.description ?? null,
+                coverUrl: updated.coverUrl ?? null,
+                isPublic: updated.isPublic,
+                tags: updated.tags ?? prev.tags,
+                updatedAt: updated.updatedAt ?? prev.updatedAt,
+              };
+            });
+            setIsEditOpen(false);
+            toast.success('歌单信息已更新');
           }}
         />
       )}

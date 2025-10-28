@@ -84,12 +84,20 @@ export async function getPlaylistById(id: number): Promise<PlaylistDetailRespons
  * 创建歌单
  */
 export async function createPlaylist(data: PlaylistFormData): Promise<Playlist> {
+  const payload = {
+    name: data.name,
+    description: data.description,
+    cover: data.coverUrl || undefined,
+    isPublic: data.isPublic,
+    tagIds: data.tagIds ?? [],
+  };
+
   const response = await fetch(API_BASE, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 
   return handleApiResponse<Playlist>(response);
@@ -99,12 +107,20 @@ export async function createPlaylist(data: PlaylistFormData): Promise<Playlist> 
  * 更新歌单
  */
 export async function updatePlaylist(id: number, data: PlaylistFormData): Promise<Playlist> {
+  const payload = {
+    name: data.name,
+    description: data.description,
+    cover: data.coverUrl || undefined,
+    isPublic: data.isPublic,
+    tagIds: data.tagIds ?? [],
+  };
+
   const response = await fetch(`${API_BASE}/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 
   return handleApiResponse<Playlist>(response);

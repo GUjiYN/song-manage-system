@@ -85,7 +85,8 @@ model Tag {
   updatedAt   DateTime @updatedAt
 
   // 关联
-  songs SongTag[]
+  songs       SongTag[]
+  playlists   PlaylistTag[]
 }
 
 // 歌曲表
@@ -126,6 +127,7 @@ model Playlist {
   user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   playlistSongs PlaylistSong[]
   followers     PlaylistFollow[]
+  playlistTags  PlaylistTag[]
 }
 
 // 歌单歌曲关联表
@@ -172,6 +174,17 @@ model SongTag {
 
   // 复合唯一索引
   @@unique([songId, tagId])
+}
+
+model PlaylistTag {
+  id         Int @id @default(autoincrement())
+  playlistId Int
+  tagId      Int
+
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  tag      Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, tagId])
 }
 
 // 枚举

@@ -24,36 +24,39 @@ function parseDateString(value?: string | null) {
   return date;
 }
 
-export async function GET(_request: NextRequest, context: { params: { id: string } }) {
+export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     await requireRole(MANAGER_ROLES);
-    const id = parseAlbumId(context.params.id);
-    const album = await getAlbumById(id);
+    const { id } = await context.params;
+    const albumId = parseAlbumId(id);
+    const album = await getAlbumById(albumId);
     return successResponse(album);
   } catch (error) {
     return handleRouteError(error);
   }
 }
 
-export async function PUT(request: NextRequest, context: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     await requireRole(MANAGER_ROLES);
-    const id = parseAlbumId(context.params.id);
+    const { id } = await context.params;
+    const albumId = parseAlbumId(id);
 
     const body = await request.json();
     const payload = albumUpdateSchema.parse(body);
-    const album = await updateAlbum(id, payload);
+    const album = await updateAlbum(albumId, payload);
     return successResponse(album);
   } catch (error) {
     return handleRouteError(error);
   }
 }
 
-export async function DELETE(_request: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     await requireRole(MANAGER_ROLES);
-    const id = parseAlbumId(context.params.id);
-    await deleteAlbum(id);
+    const { id } = await context.params;
+    const albumId = parseAlbumId(id);
+    await deleteAlbum(albumId);
     return successResponse({ message: '删除成功' });
   } catch (error) {
     return handleRouteError(error);

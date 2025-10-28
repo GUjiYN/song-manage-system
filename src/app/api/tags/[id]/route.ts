@@ -3,21 +3,20 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@/generated/prisma';
 import { requireUser } from '@/lib/auth';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // PUT - 更新标签
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireUser();
+    await requireUser();
 
-    const tagId = parseInt(params.id);
-    if (isNaN(tagId)) {
+    const { id } = await params;
+    const tagId = Number.parseInt(id, 10);
+    if (Number.isNaN(tagId)) {
       return NextResponse.json({ error: '无效的标签ID' }, { status: 400 });
     }
 
@@ -82,15 +81,13 @@ export async function PUT(
 }
 
 // DELETE - 删除标签
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireUser();
+    await requireUser();
 
-    const tagId = parseInt(params.id);
-    if (isNaN(tagId)) {
+    const { id } = await params;
+    const tagId = Number.parseInt(id, 10);
+    if (Number.isNaN(tagId)) {
       return NextResponse.json({ error: '无效的标签ID' }, { status: 400 });
     }
 

@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  outputFileTracingExcludes: {
+    '*': ['mysql-data/**', '**/mysql-data/**', 'mysql-data/mysql.sock'],
+  },
   images: {
     remotePatterns: [
       {

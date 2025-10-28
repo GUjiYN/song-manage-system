@@ -7,17 +7,25 @@ import { hashPassword } from '@/lib/password';
 
 const ADMIN_ROLES = [UserRole.ADMIN];
 
+type RouteParams = Promise<{ id: string }>;
+
+function parseUserId(rawId: string) {
+  const userId = Number.parseInt(rawId, 10);
+  if (Number.isNaN(userId)) {
+    throw new Error('Invalid user ID');
+  }
+  return userId;
+}
+
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: RouteParams }
 ) {
   try {
     await requireRole(ADMIN_ROLES);
 
-    const userId = parseInt(params.id);
-    if (isNaN(userId)) {
-      throw new Error('无效的用户ID');
-    }
+    const { id } = await params;
+    const userId = parseUserId(id);
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -34,7 +42,7 @@ export async function GET(
     });
 
     if (!user) {
-      throw new Error('用户不存在');
+      throw new Error('User not found');
     }
 
     return successResponse(user);
@@ -45,53 +53,53 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: RouteParams }
 ) {
   try {
     await requireRole(ADMIN_ROLES);
 
-    const userId = parseInt(params.id);
-    if (isNaN(userId)) {
-      throw new Error('无效的用户ID');
-    }
+    const { id } = await params;
+    const userId = parseUserId(id);
 
     const body = await request.json();
     const { username, email, name, password, role, avatar } = body;
 
-    // 验证必填字段
     if (!username || !email) {
-      throw new Error('用户名和邮箱是必填项');
+      throw new Error('Username and email are required');
     }
 
-    // 检查用户是否存在
     const existingUser = await prisma.user.findUnique({
       where: { id: userId },
     });
 
     if (!existingUser) {
-      throw new Error('用户不存在');
+      throw new Error('User not found');
     }
 
-    // 检查用户名是否被其他用户使用
     const userWithSameUsername = await prisma.user.findUnique({
       where: { username },
     });
 
     if (userWithSameUsername && userWithSameUsername.id !== userId) {
-      throw new Error('用户名已被使用');
+      throw new Error('Username already in use');
     }
 
-    // 检查邮箱是否被其他用户使用
     const userWithSameEmail = await prisma.user.findUnique({
       where: { email },
     });
 
     if (userWithSameEmail && userWithSameEmail.id !== userId) {
-      throw new Error('邮箱已被使用');
+      throw new Error('Email already in use');
     }
 
-    // 构建更新数据
-    const updateData: any = {
+    const updateData: {
+      username: string;
+      email: string;
+      name: string | null;
+      role: UserRole;
+      avatar: string | null;
+      passwordHash?: string;
+    } = {
       username,
       email,
       name: name || null,
@@ -99,12 +107,10 @@ export async function PUT(
       avatar: avatar || null,
     };
 
-    // 如果提供了新密码，则更新密码
-    if (password && password.trim()) {
+    if (password && typeof password === 'string' && password.trim()) {
       updateData.passwordHash = await hashPassword(password);
     }
 
-    // 更新用户
     const user = await prisma.user.update({
       where: { id: userId },
       data: updateData,
@@ -127,32 +133,28 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: RouteParams }
 ) {
   try {
     await requireRole(ADMIN_ROLES);
 
-    const userId = parseInt(params.id);
-    if (isNaN(userId)) {
-      throw new Error('无效的用户ID');
-    }
+    const { id } = await params;
+    const userId = parseUserId(id);
 
-    // 检查用户是否存在
     const existingUser = await prisma.user.findUnique({
       where: { id: userId },
     });
 
     if (!existingUser) {
-      throw new Error('用户不存在');
+      throw new Error('User not found');
     }
 
-    // 删除用户
     await prisma.user.delete({
       where: { id: userId },
     });
 
-    return successResponse({ message: '用户已删除' });
+    return successResponse({ message: 'User deleted' });
   } catch (error) {
     return handleRouteError(error);
   }

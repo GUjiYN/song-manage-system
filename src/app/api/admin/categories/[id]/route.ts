@@ -15,38 +15,41 @@ function parseCategoryId(param: string) {
   return id;
 }
 
-export async function GET(_request: NextRequest, context: { params: { id: string } }) {
+export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     await requireRole(MANAGER_ROLES);
-    const id = parseCategoryId(context.params.id);
+    const { id } = await context.params;
+    const categoryId = parseCategoryId(id);
 
-    const category = await getCategoryById(id);
+    const category = await getCategoryById(categoryId);
     return successResponse(category);
   } catch (error) {
     return handleRouteError(error);
   }
 }
 
-export async function PUT(request: NextRequest, context: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     await requireRole(MANAGER_ROLES);
-    const id = parseCategoryId(context.params.id);
+    const { id } = await context.params;
+    const categoryId = parseCategoryId(id);
 
     const body = await request.json();
     const payload = categoryUpdateSchema.parse(body);
-    const category = await updateCategory(id, payload);
+    const category = await updateCategory(categoryId, payload);
     return successResponse(category);
   } catch (error) {
     return handleRouteError(error);
   }
 }
 
-export async function DELETE(_request: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     await requireRole(MANAGER_ROLES);
-    const id = parseCategoryId(context.params.id);
+    const { id } = await context.params;
+    const categoryId = parseCategoryId(id);
 
-    await deleteCategory(id);
+    await deleteCategory(categoryId);
     return successResponse({ message: '删除成功' });
   } catch (error) {
     return handleRouteError(error);

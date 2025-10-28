@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -24,23 +24,25 @@ interface TagSelectorProps {
   onSelectionChange?: (tagIds: number[]) => void;
   maxSelections?: number;
   disabled?: boolean;
+  fetchUrl?: string;
 }
 
 export function TagSelector({
   selectedTagIds = [],
   onSelectionChange,
   maxSelections = 10,
-  disabled = false
+  disabled = false,
+  fetchUrl = '/api/admin/tags'
 }: TagSelectorProps) {
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set(selectedTagIds));
 
   // 加载标签列表
-  const loadTags = async () => {
+  const loadTags = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/admin/tags');
+      const response = await fetch(fetchUrl);
       if (!response.ok) {
         throw new Error('加载标签失败');
       }
@@ -56,11 +58,11 @@ export function TagSelector({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fetchUrl]);
 
   useEffect(() => {
     loadTags();
-  }, []);
+  }, [loadTags]);
 
   // 同步外部传入的选中状态
   useEffect(() => {
