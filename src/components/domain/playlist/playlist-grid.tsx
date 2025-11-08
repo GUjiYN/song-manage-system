@@ -13,7 +13,6 @@ interface PlaylistGridProps {
   onDelete?: (playlistId: number, playlistName: string) => void;
   isDeleting?: number | null;
   className?: string;
-  onSelect?: (playlistId: number) => void;
 }
 
 export function PlaylistGrid({
@@ -23,7 +22,6 @@ export function PlaylistGrid({
   onDelete,
   isDeleting = null,
   className = '',
-  onSelect,
 }: PlaylistGridProps) {
   // 空状态
   if (!playlists || playlists.length === 0) {
@@ -41,7 +39,6 @@ export function PlaylistGrid({
           onEdit={onEdit}
           onDelete={onDelete}
           isDeleting={isDeleting}
-          onSelect={onSelect}
         />
       ))}
     </div>

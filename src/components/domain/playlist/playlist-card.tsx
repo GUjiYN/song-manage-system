@@ -4,6 +4,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { User, Music, Edit, Trash2, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Playlist } from '@/types/playlist';
+import { memo } from 'react';
 
 interface PlaylistCardProps {
   playlist: Playlist;
@@ -21,18 +23,18 @@ interface PlaylistCardProps {
   onDelete?: (playlistId: number, playlistName: string) => void;
   isDeleting?: number | null;
   className?: string;
-  onSelect?: (playlistId: number) => void;
 }
 
-export function PlaylistCard({
+export const PlaylistCard = memo(function PlaylistCard({
   playlist,
   showActions = false,
   onEdit,
   onDelete,
   isDeleting = null,
   className = '',
-  onSelect,
 }: PlaylistCardProps) {
+  const router = useRouter();
+
   const handleEditClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -45,16 +47,14 @@ export function PlaylistCard({
     onDelete?.(playlist.id, playlist.name);
   };
 
+  const handleCardClick = () => {
+    router.push(`/playlists/${playlist.id}`);
+  };
+
   const cardContent = (
     <div
       className={`group cursor-pointer transition-all duration-200 ${className}`}
-      onClick={(e) => {
-        if (onSelect) {
-          e.preventDefault();
-          e.stopPropagation();
-          onSelect(playlist.id);
-        }
-      }}
+      onClick={handleCardClick}
     >
       {/* 封面容器 - 正方形 */}
       <div className="relative aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200">
@@ -123,27 +123,41 @@ export function PlaylistCard({
     </div>
   );
 
-  if (onSelect) {
-    return (
-      <div>
-        {cardContent}
-      </div>
-    );
-  }
-
-  if (showActions) {
-    // 在有管理按钮时，不使用 Link 包装，直接使用 onClick 事件
-    return (
-      <div onClick={() => (window.location.href = `/playlists/${playlist.id}`)}>
-        {cardContent}
-      </div>
-    );
-  }
-
-  // 普通模式，使用 Link 包装
+  // 所有情况都使用简单的div包装，点击时通过路由跳转
   return (
-    <Link href={`/playlists/${playlist.id}`}>
+    <div>
       {cardContent}
-    </Link>
+      {/* 操作按钮 */}
+      {showActions && (
+        <div className="mt-2 flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleEditClick}>
+                <Edit className="w-4 h-4 mr-2" />
+                编辑
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleDeleteClick}
+                className="text-red-600 focus:text-red-600"
+                disabled={isDeleting === playlist.id}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {isDeleting === playlist.id ? '删除中...' : '删除'}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+    </div>
   );
-}
+});

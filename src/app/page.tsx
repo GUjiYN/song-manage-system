@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { MainLayout } from '@/components/layout/main-layout';
 import { PlaylistGrid } from '@/components/domain/playlist/playlist-grid';
-import { PlaylistDetailInline } from '@/components/domain/playlist/playlist-detail-inline';
 import { getPublicPlaylists } from '@/services/client/playlist';
 import { Playlist } from '@/types/playlist';
 import { useAuth } from '@/contexts/auth-context';
@@ -22,9 +21,6 @@ export default function Home() {
   const { user } = useAuth();
   const [featuredPlaylists, setFeaturedPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // 详情视图：在本页内渲染
-  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   // 加载推荐歌单
   useEffect(() => {
@@ -43,17 +39,10 @@ export default function Home() {
     loadFeaturedPlaylists();
   }, []);
 
-  // 点击歌单：在本页渲染内嵌详情
-  const handleSelectPlaylist = (id: number) => {
-    setSelectedId(id);
-  };
-
   return (
     <MainLayout>
-      {!selectedId && (
-        <>
-          {/* Hero 区域 */}
-          <div className="mb-12">
+      {/* Hero 区域 */}
+      <div className="mb-12">
             <div className="bg-gradient-to-br from-indigo-600 to-pink-600 rounded-2xl p-8 md:p-12 text-white shadow-xl">
               <div className="max-w-3xl">
                 <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -159,7 +148,7 @@ export default function Home() {
                 ))}
               </div>
             ) : featuredPlaylists.length > 0 ? (
-              <PlaylistGrid playlists={featuredPlaylists} onSelect={handleSelectPlaylist} />
+              <PlaylistGrid playlists={featuredPlaylists} />
             ) : (
               <Card className="p-12 text-center">
                 <Music className="w-16 h-16 text-slate-300 mx-auto mb-4" />
@@ -205,18 +194,6 @@ export default function Home() {
               </div>
             </div>
           )}
-        </>
-      )}
-
-      {/* 主内容：在页内展示歌单详情；未选择时显示首页内容 */}
-      {selectedId ? (
-        <div className="space-y-4">
-          <PlaylistDetailInline
-            id={selectedId}
-            onBack={() => setSelectedId(null)}
-          />
-        </div>
-      ) : null}
-    </MainLayout>
-  );
+        </MainLayout>
+      );
 }

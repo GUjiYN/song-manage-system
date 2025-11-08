@@ -10,6 +10,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Search, Music, ListMusic, Heart, Compass, Library, Home, ChevronRight, ChevronDown, Plus, ArrowLeft, ChevronDown as ChevronDownIcon, User, LogOut, Settings, MoreHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -19,7 +20,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { PlaylistDialog } from '@/components/domain/playlist/playlist-dialog';
-import { PlaylistDetailInline } from '@/components/domain/playlist/playlist-detail-inline';
+import { LoginPromptCard } from '@/components/domain/auth/login-prompt-card';
 import { useAuth } from '@/contexts/auth-context';
 import { getMyPlaylists, getFollowedPlaylists, deletePlaylist, unfollowPlaylist } from '@/services/client/playlist';
 import type { Playlist } from '@/types/playlist';
@@ -155,9 +156,124 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
     };
   }, []);
 
-  // 如果用户未登录，只显示内容（不显示需要登录的功能）
+  // 未登录用户显示简化布局
   if (!user) {
-    return <>{children}</>;
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <div className="flex">
+          {/* 简化侧边栏 - 桌面端 */}
+          <aside className="flex flex-col fixed inset-y-0 w-56 bg-white border-r border-slate-200 z-40">
+            <div className="flex-1 flex flex-col py-8 px-4 overflow-y-auto">
+              {/* Logo 和系统名 */}
+              <div className="mb-8 pb-6 border-b border-slate-200">
+                <Link href="/" className="flex items-center gap-3 group">
+                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
+                    <Music className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">歌单管理</h1>
+                    <p className="text-xs text-slate-500">Playlist Manager</p>
+                  </div>
+                </Link>
+              </div>
+
+              {/* 导航菜单 */}
+              <nav className="flex-1 space-y-2">
+                <p className="px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                  导航
+                </p>
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`flex items-center gap-3 px-2 py-2.5 rounded-lg transition-colors ${
+                        isActive
+                          ? 'bg-indigo-50 text-indigo-700 font-medium'
+                          : 'text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5 flex-shrink-0" />
+                      <span className="whitespace-nowrap">{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* 登录提示卡片 */}
+              <div className="mt-6">
+                <LoginPromptCard />
+              </div>
+            </div>
+          </aside>
+
+          {/* 主内容区 */}
+          <main className="flex-1 pl-56">
+            <div className="min-h-screen">
+              {/* 顶部导航 - 简化版 */}
+              <div className={`sticky top-0 z-30 transition-all duration-300 ${
+                isScrolled
+                  ? 'fixed top-0 left-56 right-0 bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm'
+                  : 'bg-transparent'
+              } ${showScrollShadow ? 'shadow-md' : ''}`}>
+                <div className={`px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
+                  isScrolled ? 'py-2' : 'py-3'
+                }`}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 flex-1 max-w-2xl">
+                      {/* 返回按钮（全局） */}
+                      <button
+                        onClick={() => router.back()}
+                        aria-label="返回"
+                        className="p-2 rounded-md hover:bg-slate-100 text-slate-600 hover:text-indigo-700"
+                      >
+                        <ArrowLeft className="w-5 h-5" />
+                      </button>
+                      {/* 搜索 */}
+                      <form onSubmit={handleSearch} className="flex-1">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                          <Input
+                            type="text"
+                            placeholder="搜索歌单、歌曲、歌手..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 h-9 bg-slate-50 border-slate-300 focus:border-indigo-500 focus:bg-white"
+                          />
+                        </div>
+                      </form>
+                    </div>
+
+                    {/* 右侧：登录/注册按钮 */}
+                    <div className="flex items-center gap-3">
+                      <Link href="/auth/login">
+                        <Button variant="outline" size="sm">
+                          登录
+                        </Button>
+                      </Link>
+                      <Link href="/auth/register">
+                        <Button size="sm">
+                          注册
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 页面主体内容 */}
+              <div className={`px-6 py-6 transition-all duration-300 ${
+                isScrolled ? 'mt-16' : 'mt-0'
+              }`}>
+                {children}
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -433,15 +549,11 @@ export function MainLayout({ children, onCreatePlaylist }: MainLayoutProps) {
               </div>
             </div>
 
-            {/* 页面主体内容：若选择了侧边栏歌单，则在当前页渲染详情 */}
+            {/* 页面主体内容 */}
             <div className={`px-6 py-6 transition-all duration-300 ${
               isScrolled ? 'mt-16' : 'mt-0'
             }`}>
-              {selectedPlaylistId ? (
-                <PlaylistDetailInline id={selectedPlaylistId} />
-              ) : (
-                children
-              )}
+              {children}
             </div>
           </div>
         </main>
